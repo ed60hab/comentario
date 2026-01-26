@@ -38,7 +38,17 @@ app.post('/update-file', (req, res) => {
         console.log(`✅ Archivo guardado: ${filename}`);
 
         // Comandos Git
-        const gitPath = `"C:\\Program Files\\Git\\bin\\git.exe"`;
+        // Detectar OS para comando Git
+        const isWindows = process.platform === "win32";
+        let gitPath = "git";
+
+        if (isWindows) {
+            // Check if specific path exists, otherwise default to 'git'
+            const specificPath = "C:\\Program Files\\Git\\bin\\git.exe";
+            if (fs.existsSync(specificPath)) {
+                gitPath = `"${specificPath}"`;
+            }
+        }
         const commands = [
             `cd "${REPO_PATH}"`,
             `${gitPath} add "${filename}"`,
