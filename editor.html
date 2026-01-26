@@ -978,10 +978,37 @@ ${verseLink}
 
                 // 1. Find the chapter container
                 const chapterId = `${selectionState.chapter}`;
-                const chapterContainer = doc.getElementById(chapterId);
+                let chapterContainer = doc.getElementById(chapterId);
 
                 if (!chapterContainer) {
-                    throw new Error(`No se encontró el Capítulo ${chapterId} en ${bookFilename}. Verifica que el libro tenga esa sección.`);
+                    console.log(`Creating missing chapter container for chapter ${chapterId}...`);
+
+                    // Find the insertion point (after THE START CHAPTER CONTENT marker or after chapters-nav)
+                    const contentMarker = Array.from(doc.childNodes).find(node =>
+                        node.nodeType === Node.COMMENT_NODE && node.nodeValue.includes('START CHAPTER CONTENT')
+                    );
+
+                    chapterContainer = doc.createElement('div');
+                    chapterContainer.id = chapterId;
+                    chapterContainer.className = 'chapter-container';
+                    chapterContainer.innerHTML = `
+            <h2 class="chapter-title">Capítulo ${chapterId}</h2>
+            <nav class="verse-nav mb-4">
+                <span class="verse-nav-title">Versículos</span>
+                <div class="verse-grid">
+                </div>
+            </nav>
+            <div class="return-top">
+                <a href="#top">↑ Volver Arriba</a>
+            </div>`;
+
+                    if (contentMarker && contentMarker.nextSibling) {
+                        contentMarker.parentNode.insertBefore(chapterContainer, contentMarker.nextSibling);
+                        contentMarker.parentNode.insertBefore(doc.createTextNode('\n        '), chapterContainer);
+                    } else {
+                        // Fallback: append to body if marker not found
+                        doc.querySelector('.container').appendChild(chapterContainer);
+                    }
                 }
 
                 // 2. Add verse to index grid if missing
