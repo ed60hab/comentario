@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Comentarios Bíblicos</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="./img/Saved_512.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&display=swap"
+        rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --accent-color: #3182ce;
+            --accent-hover: #2b6cb0;
+            --border-radius: 12px;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --font-main: 'Inter', system-ui, sans-serif;
+            --font-serif: 'Merriweather', serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 900px;
+        }
+
+        .editor-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+        }
+
+        .editor-title {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .toolbar button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .toolbar button:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .char-btn {
+            min-width: 40px;
+            padding: 0.5rem 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .hebrew-char {
+            font-family: 'SBL Hebrew', 'Ezra SIL', serif;
+            font-size: 1.3rem;
+        }
+
+        .greek-char {
+            font-family: 'Times New Roman', serif;
+            font-size: 1.2rem;
+        }
+
+        .toolbar-section {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            padding-right: 0.5rem;
+            border-right: 2px solid #e2e8f0;
+        }
+
+        .toolbar-section:last-child {
+            border-right: none;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-right: 0.25rem;
+        }
+
+        #editor {
+            min-height: 300px;
+            padding: 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            outline: none;
+        }
+
+        #editor:focus {
+            border-color: var(--accent-color);
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-save:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .selection-item {
+            padding: 1rem;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .selection-item:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .output-section {
+            margin-top: 2rem;
+        }
+
+        .output-code {
+            background: #1a202c;
+            color: #48bb78;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .btn-copy {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-copy:hover {
+            background: #38a169;
+        }
+
+        .step-indicator {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .btn-back {
+            padding: 0.5rem 1rem;
+            background: #e2e8f0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .btn-back:hover {
+            background: #cbd5e0;
+        }
+
+        .keyboard-row {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+        }
+
+        .char-btn {
+            min-width: 32px;
+            height: 32px;
+            padding: 2px;
+            font-size: 1.1rem;
+        }
+
+        .btn-delete {
+            display: inline-block;
+            margin-top: 0.5rem;
+            margin-left: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: #e53e3e;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: #c53030;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .bible-verse-editor {
+            margin-bottom: 1.5rem;
+            padding: 1.2rem;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--border-radius);
+        }
+
+        .bible-verse-editor label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bible-verse-editor textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.8rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-family: 'Merriweather', serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        .btn-fetch-bible {
+            padding: 0.3rem 0.8rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-fetch-bible:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="editor-card">
+            <h1 class="editor-title">Editor de Comentarios Bíblicos</h1>
+
+            <div class="toolbar">
+                <div class="toolbar-section">
+                    <span class="section-label">Formato</span>
+                    <button onclick="formatText('bold')"><strong>Negrita</strong></button>
+                    <button onclick="formatText('italic')"><em>Cursiva</em></button>
+                    <button onclick="insertParagraph()">Nuevo Párrafo</button>
+                </div>
+
+                <div class="toolbar-section" style="flex-direction: column; align-items: flex-start;">
+                    <span class="section-label">Hebreo</span>
+                    <div id="hebrew-keyboard" style="display: flex; flex-direction: column; gap: 5px;"></div>
+                </div>
+
+                <div class="toolbar-section" style="flex-direction: column; align-items: flex-start;">
+                    <span class="section-label">Griego</span>
+                    <div id="greek-keyboard" style="display: flex; flex-direction: column; gap: 5px;"></div>
+                </div>
+            </div>
+
+            <div class="bible-verse-editor">
+                <label>
+                    Texto Bíblico (LBLA)
+                    <button class="btn-fetch-bible" id="fetchBibleBtn" onclick="fetchBibleText()"
+                        style="display: none;">🔄 Cargar LBLA</button>
+                </label>
+                <textarea id="bibleVerseText" placeholder="Selecciona un versículo para cargar el texto..."></textarea>
+            </div>
+
+            <div id="editor" contenteditable="true">
+                <p>Escribe tu comentario aquí...</p>
+            </div>
+
+            <button class="btn-save" style="background: #2d3748;" onclick="openModal()">🔍 Seleccionar Libro /
+                Versículo</button>
+            <button class="btn-save" id="publishBtn" onclick="saveCommentary()" style="display: none;">🚀 Publicar en
+                GitHub</button>
+            <button class="btn-delete" id="deleteVerseBtn" onclick="deleteCurrentVerse()"
+                style="display: none; width: 100%; margin-left: 0; padding: 1rem;">🗑️ Borrar este Versículo</button>
+            <a href="index.html" class="btn-save"
+                style="background: #718096; text-decoration: none; text-align: center; display: block;">Volver al
+                Índice</a>
+        </div>
+    </div>
+
+    <!-- Modal for Book/Chapter/Verse Selection -->
+    <div id="selectionModal" class="modal">
+        <div class="modal-content">
+            <div class="step-indicator" id="stepIndicator"></div>
+            <button class="btn-back" id="backBtn" onclick="goBack()" style="display: none;">← Atrás</button>
+            <h2 class="modal-title" id="modalTitle">Seleccionar Testamento</h2>
+            <div id="selectionContainer"></div>
+            <div id="outputSection" class="output-section" style="display: none;">
+                <h3>HTML Generado:</h3>
+                <div id="outputCode" class="output-code"></div>
+                <button class="btn-copy" onclick="downloadHTML()">📥 Descargar HTML</button>
+                <button class="btn-copy" onclick="closeModal()"
+                    style="background: #718096; margin-left: 0.5rem;">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const hebrewAlpha = [
+            ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ך', 'ל'],
+            ['מ', 'ם', 'נ', 'ן', 'ס', 'ע', 'פ', 'ף', 'צ', 'ץ', 'ק', 'ר', 'ש', 'ת']
+        ];
+
+        const greekAlpha = [
+            ['α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ'],
+            ['ν', 'ξ', 'ο', 'π', 'ρ', 'ς', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω']
+        ];
+
+        function createKeyboard(id, rows) {
+            const container = document.getElementById(id);
+            container.innerHTML = '';
+            rows.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'keyboard-row';
+                row.forEach(char => {
+                    const btn = document.createElement('button');
+                    btn.className = 'char-btn';
+                    btn.textContent = char;
+                    btn.onclick = () => insertChar(char);
+                    rowDiv.appendChild(btn);
+                });
+                container.appendChild(rowDiv);
+            });
+        }
+
+        window.onload = () => {
+            createKeyboard('hebrew-keyboard', hebrewAlpha);
+            createKeyboard('greek-keyboard', greekAlpha);
+            loadBooksData();
+            checkEditMode();
+            handleAction();
+        };
+
+        function handleAction() {
+            const params = new URLSearchParams(window.location.search);
+            const action = params.get('action');
+            const book = params.get('book');
+            const chapter = params.get('chapter');
+            const verse = params.get('verse');
+
+            if (action === 'delete' && book && chapter && verse) {
+                if (confirm(`¿Estás seguro de que quieres BORRAR el comentario de ${book} ${chapter}:${verse}?`)) {
+                    deleteCommentary(book, chapter, verse);
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }
+        }
+
+        async function deleteCommentary(bookName, chapter, verse) {
+            try {
+                const bookFilename = bookName.endsWith('.html') ? bookName : bookName + '.html';
+                const resp = await fetch(bookFilename);
+                if (!resp.ok) throw new Error('No se pudo cargar el libro');
+                const html = await resp.text();
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const verseId = `${chapter}.${verse}`;
+                const verseBlock = doc.getElementById(verseId);
+
+                if (verseBlock) {
+                    // Remove the verse block
+                    verseBlock.remove();
+
+                    // Remove from index
+                    const chapterContainer = doc.getElementById(chapter);
+                    if (chapterContainer) {
+                        const grid = chapterContainer.querySelector('.verse-grid');
+                        if (grid) {
+                            const link = grid.querySelector(`a[href="#${verseId}"]`);
+                            if (link) link.remove();
+                        }
+                    }
+
+                    const serializer = new XMLSerializer();
+                    const updatedHTML = serializer.serializeToString(doc);
+
+                    const publishResp = await fetch('http://localhost:3000/update-file', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            filename: bookFilename,
+                            content: updatedHTML,
+                            commitMessage: `Borrar comentario: ${bookName} ${chapter}:${verse}`
+                        })
+                    });
+
+                    const result = await publishResp.json();
+                    if (result.success) {
+                        alert('✅ Comentario borrado y actualizado en GitHub.');
+                        window.location.href = bookFilename;
+                    } else {
+                        throw new Error(result.error);
+                    }
+                } else {
+                    alert('No se encontró el comentario especificado.');
+                    window.location.href = 'index.html';
+                }
+            } catch (e) {
+                alert('❌ Error al borrar: ' + e.message);
+                window.location.href = 'index.html';
+            }
+        }
+
+        let booksData = [];
+        let selectionState = {
+            step: 0, // 0: testament, 1: book, 2: chapter, 3: verse
+            testament: null,
+            book: null,
+            chapter: null,
+            verse: null
+        };
+        let editMode = {
+            isEditing: false,
+            bookName: null,
+            chapter: null,
+            verse: null,
+            originalHTML: null
+        };
+
+        // Load books data from index.html
+        async function loadBooksData() {
+            try {
+                booksData = []; // Clear
+                console.log('Cargando libros...');
+
+                // Add timestamp to bypass cache
+                const resp = await fetch('index.html?v=' + Date.now());
+                if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+
+                const html = await resp.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const bookCards = doc.querySelectorAll('.book-card');
+
+                bookCards.forEach(card => {
+                    const href = card.getAttribute('href');
+                    const title = card.querySelector('.book-title')?.textContent.trim();
+                    const chaptersMatch = card.querySelector('.chapter-count')?.textContent.match(/\d+/);
+                    const chapters = parseInt(chaptersMatch ? chaptersMatch[0] : '1');
+
+                    // Determine testament by its container's ID
+                    let testament = 'OT';
+                    const container = card.closest('#nt-container') || card.closest('.nt-section');
+                    if (container) {
+                        testament = 'NT';
+                    }
+
+                    if (href && title) {
+                        booksData.push({ filename: href, title, chapters, testament });
+                    }
+                });
+
+                console.log(`Cargados ${booksData.length} libros.`);
+                if (booksData.length === 0) {
+                    alert('⚠️ No se encontraron libros en index.html. Verifica que el archivo no esté vacío.');
+                }
+            } catch (error) {
+                console.error('Error loading books:', error);
+                alert('⚠️ Error al cargar libros: ' + error.message);
+            }
+        }
+
+        function formatText(command) {
+            document.execCommand(command, false, null);
+        }
+
+        function insertParagraph() {
+            document.execCommand('insertParagraph', false, null);
+        }
+
+        function insertChar(char) {
+            const editor = document.getElementById('editor');
+            editor.focus();
+            document.execCommand('insertText', false, char);
+        }
+
+        function openModal() {
+            selectionState = { step: 0, testament: null, book: null, chapter: null, verse: null };
+            document.getElementById('selectionModal').classList.add('active');
+            showTestamentSelection();
+        }
+
+        function closeModal() {
+            document.getElementById('selectionModal').classList.remove('active');
+        }
+
+        function goBack() {
+            selectionState.step--;
+            if (selectionState.step === 0) {
+                showTestamentSelection();
+            } else if (selectionState.step === 1) {
+                showBookSelection();
+            } else if (selectionState.step === 2) {
+                showChapterSelection();
+            }
+        }
+
+        function updateStepIndicator() {
+            const steps = ['Testamento', 'Libro', 'Capítulo', 'Versículo'];
+            const indicator = document.getElementById('stepIndicator');
+            indicator.textContent = `Paso ${selectionState.step + 1} de 4: ${steps[selectionState.step]}`;
+
+            const backBtn = document.getElementById('backBtn');
+            backBtn.style.display = selectionState.step > 0 ? 'block' : 'none';
+        }
+
+        function showTestamentSelection() {
+            selectionState.step = 0;
+            updateStepIndicator();
+            document.getElementById('modalTitle').textContent = 'Seleccionar Testamento';
+            document.getElementById('outputSection').style.display = 'none';
+
+            const container = document.getElementById('selectionContainer');
+            container.innerHTML = `
+                <div class="selection-grid">
+                    <div class="selection-item" onclick="selectTestament('OT')">
+                        <div>Antiguo Testamento</div>
+                    </div>
+                    <div class="selection-item" onclick="selectTestament('NT')">
+                        <div>Nuevo Testamento</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectTestament(testament) {
+            selectionState.testament = testament;
+            selectionState.step = 1;
+            showBookSelection();
+        }
+
+        function showBookSelection() {
+            updateStepIndicator();
+            document.getElementById('modalTitle').textContent = 'Seleccionar Libro';
+
+            const filteredBooks = booksData.filter(b => b.testament === selectionState.testament);
+            const container = document.getElementById('selectionContainer');
+
+            if (filteredBooks.length === 0) {
+                container.innerHTML = `
+                    <div style="padding: 2rem; text-align: center;">
+                        <p>❌ No se encontraron libros para este testamento.</p>
+                        <p style="font-size: 0.9rem; color: #666;">Intenta recargar el editor (F5) o usa la URL: http://localhost:3000/editor.html</p>
+                        <button class="btn-save" onclick="loadBooksData(); showTestamentSelection();">🔄 Reintentar Cargar</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="selection-grid">';
+            filteredBooks.forEach(book => {
+                html += `
+                    <div class="selection-item" onclick="selectBook('${book.filename}')">
+                        <div>${book.title}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        function selectBook(filename) {
+            selectionState.book = booksData.find(b => b.filename === filename);
+            selectionState.step = 2;
+            showChapterSelection();
+        }
+
+        function showChapterSelection() {
+            updateStepIndicator();
+            document.getElementById('modalTitle').textContent = `Seleccionar Capítulo de ${selectionState.book.title}`;
+
+            const container = document.getElementById('selectionContainer');
+            let html = '<div class="selection-grid">';
+
+            for (let i = 1; i <= selectionState.book.chapters; i++) {
+                html += `
+                    <div class="selection-item" onclick="selectChapter(${i})">
+                        <div>${i}</div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        function selectChapter(chapter) {
+            selectionState.chapter = chapter;
+            selectionState.step = 3;
+            showVerseSelection();
+        }
+
+        function showVerseSelection() {
+            updateStepIndicator();
+            document.getElementById('modalTitle').textContent = `Seleccionar Versículo - ${selectionState.book.title} ${selectionState.chapter}`;
+
+            const container = document.getElementById('selectionContainer');
+            let html = '<div class="selection-grid" id="verseGrid">';
+
+            // Show verses 1-50 (expandable)
+            for (let i = 1; i <= 50; i++) {
+                html += `
+                    <div class="selection-item" onclick="selectVerse(${i})">
+                        <div>${i}</div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            html += '<div id="verseConfirmation" style="display: none; margin-top: 2rem; text-align: center;">';
+            html += '<p style="font-size: 1.2rem; margin-bottom: 1rem;">Cargando versículo...</p>';
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        async function selectVerse(verse) {
+            selectionState.verse = verse;
+
+            // --- NUEVO: Verificar si ya existe el versículo ---
+            try {
+                const bookFilename = selectionState.book.filename;
+                const resp = await fetch(bookFilename);
+                if (resp.ok) {
+                    const html = await resp.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const verseId = `${selectionState.chapter}.${verse}`;
+                    const verseBlock = doc.getElementById(verseId);
+
+                    document.getElementById('bibleVerseText').value = '';
+                    document.getElementById('editor').innerHTML = '<p>Escribe tu comentario aquí...</p>';
+
+                    if (verseBlock) {
+                        const commentary = verseBlock.querySelector('.commentary');
+                        const bibleText = verseBlock.querySelector('.verse-text');
+
+                        if (commentary) {
+                            document.getElementById('editor').innerHTML = commentary.innerHTML;
+                            if (bibleText) {
+                                document.getElementById('bibleVerseText').value = bibleText.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+                            }
+
+                            editMode.isEditing = true;
+                            editMode.bookName = bookFilename.replace('.html', '');
+                            editMode.chapter = selectionState.chapter;
+                            editMode.verse = verse;
+                            editMode.originalHTML = html;
+
+                            document.querySelector('.editor-title').textContent = `Editando: ${selectionState.book.title} ${selectionState.chapter}:${verse}`;
+                        }
+                    } else {
+                        editMode.isEditing = false;
+                        editMode.bookName = bookFilename.replace('.html', '');
+                        editMode.chapter = selectionState.chapter;
+                        editMode.verse = verse;
+                        editMode.originalHTML = html;
+
+                        document.querySelector('.editor-title').textContent = `Nuevo: ${selectionState.book.title} ${selectionState.chapter}:${verse}`;
+                        fetchBibleText();
+                    }
+                }
+            } catch (e) {
+                console.log('Error verificando versículo:', e);
+            }
+
+            //UI Updates
+            document.getElementById('fetchBibleBtn').style.display = 'inline-block';
+            document.getElementById('publishBtn').style.display = 'block';
+            document.getElementById('deleteVerseBtn').style.display = editMode.isEditing ? 'block' : 'none';
+
+            closeModal();
+        }
+
+        function saveCommentary() {
+            if (editMode.isEditing) {
+                updateBookFile();
+            } else {
+                downloadHTML();
+            }
+        }
+
+        async function deleteCurrentVerse() {
+            if (confirm(`¿Estás seguro de que quieres borrar el comentario de ${selectionState.book.title} ${selectionState.chapter}:${selectionState.verse}?`)) {
+                const bookName = editMode.bookName;
+                const chapter = editMode.chapter;
+                const verse = editMode.verse;
+
+                try {
+                    const resp = await fetch(selectionState.book.filename);
+                    const html = await resp.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const verseId = `${chapter}.${verse}`;
+                    const verseElement = doc.getElementById(verseId);
+
+                    if (verseElement) {
+                        verseElement.remove();
+                        const gridLink = doc.querySelector(`a[href="#${verseId}"]`);
+                        if (gridLink) gridLink.remove();
+
+                        const serializer = new XMLSerializer();
+                        const updatedHTML = serializer.serializeToString(doc);
+
+                        const response = await fetch('http://localhost:3000/update-file', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                filename: `${bookName}.html`,
+                                content: updatedHTML,
+                                commitMessage: `Borrado comentario de ${bookName} ${chapter}:${verse}`
+                            })
+                        });
+
+                        const result = await response.json();
+                        if (result.success) {
+                            alert('✅ Comentario borrado y actualizado en GitHub.');
+                            window.location.reload();
+                        }
+                    }
+                } catch (e) {
+                    alert('Error al borrar: ' + e.message);
+                }
+            }
+        }
+
+        function confirmVerse() {
+            // Trigger automation directly instead of showing code
+            downloadHTML();
+        }
+
+        function cancelVerseSelection() {
+            // Reset and show the grid again
+            const grid = document.getElementById('verseGrid');
+            const confirmation = document.getElementById('verseConfirmation');
+
+            grid.style.display = 'grid';
+            confirmation.style.display = 'none';
+            selectionState.verse = null;
+        }
+
+        function generateOutput() {
+            const editor = document.getElementById('editor');
+            const content = editor.innerHTML;
+
+            // Generate the HTML block
+            const verseId = `${selectionState.chapter}.${selectionState.verse}`;
+            const verseRef = `${selectionState.chapter}:${selectionState.verse}`;
+            const bookFilename = selectionState.book.filename;
+
+            const verseBlock = `
+            <!-- Verse ${verseId} -->
+            <div class="verse-block" id="${verseId}">
+                <span class="verse-ref">${verseRef}</span>
+                <p class="verse-text">Texto bíblico de ${selectionState.book.title} ${verseRef}...</p>
+                <div class="commentary">
+                    ${content}
+                </div>
+                <a href="editor.html?book=${bookFilename.replace('.html', '')}&chapter=${selectionState.chapter}&verse=${selectionState.verse}" class="btn-edit">✏️ Editar</a>
+            </div>`;
+
+            // Generate verse index link
+            const verseLink = `<a href="#${verseId}" class="v-link">${selectionState.verse}</a>`;
+
+            // Combined output with instructions
+            const output = `
+=== BLOQUE DEL VERSÍCULO ===
+(Pega esto en la sección de contenido del capítulo ${selectionState.chapter})
+
+${verseBlock}
+
+=== ENLACE DEL ÍNDICE DE VERSÍCULOS ===
+(Si el versículo ${selectionState.verse} no existe en el índice de versículos del capítulo ${selectionState.chapter}, añade este enlace)
+
+${verseLink}
+
+=== INSTRUCCIONES ===
+1. Abre ${selectionState.book.filename}
+2. Busca el capítulo ${selectionState.chapter}
+3. En el índice de versículos (verse-grid), verifica si existe el enlace al versículo ${selectionState.verse}
+4. Si NO existe, añade el enlace del índice arriba
+5. Pega el bloque del versículo en la sección de contenido del capítulo
+6. El botón "Editar" permite modificar este versículo directamente desde el editor
+`;
+
+            document.getElementById('outputCode').textContent = output;
+            document.getElementById('outputSection').style.display = 'block';
+            document.getElementById('selectionContainer').style.display = 'none';
+            document.getElementById('modalTitle').textContent = 'Comentario Generado';
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('stepIndicator').textContent = `${selectionState.book.title} ${verseRef}`;
+        }
+
+        async function fetchBibleText() {
+            const verseText = document.getElementById('bibleVerseText');
+            const book = selectionState.book ? selectionState.book.title : null;
+            const chapter = selectionState.chapter;
+            const verse = selectionState.verse;
+
+            if (!book || !chapter || !verse) return;
+
+            verseText.value = "Cargando texto bíblico...";
+
+            try {
+                const url = `http://localhost:3000/fetch-bible?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
+                const resp = await fetch(url);
+                const data = await resp.json();
+
+                if (data.text) {
+                    // Si hay hebreo (wlc) y español (lbla), los ponemos en líneas separadas
+                    if (data.wlc && data.lbla) {
+                        verseText.value = `${data.wlc}\n${data.lbla}`;
+                    } else {
+                        verseText.value = data.text;
+                    }
+                } else {
+                    verseText.value = `(No se pudo cargar el texto automáticamente para ${book} ${chapter}:${verse})`;
+                }
+            } catch (e) {
+                console.error('Error fetching Bible:', e);
+                verseText.value = `(Error de conexión al cargar ${book} ${chapter}:${verse})`;
+            }
+        }
+
+        async function downloadHTML() {
+            const editor = document.getElementById('editor');
+            const content = editor.innerHTML;
+            const bibleText = document.getElementById('bibleVerseText').value;
+            const verseId = `${selectionState.chapter}.${selectionState.verse}`;
+            const verseRef = `${selectionState.chapter}:${selectionState.verse}`;
+            const bookName = selectionState.book.filename.replace('.html', '');
+            const bookFilename = selectionState.book.filename;
+
+            // Convertir saltos de línea a <br> para que se apilen correctamente
+            const bibleTextHTML = bibleText.replace(/\n/g, '<br>');
+
+            // Generate the HTML block for a new verse
+            const verseBlockHTML = `
+            <!-- Verse ${verseId} -->
+            <div class="verse-block" id="${verseId}">
+                <span class="verse-ref">${verseRef}</span>
+                <p class="verse-text">${bibleTextHTML}</p>
+                <div class="commentary">
+                    ${content}
+                </div>
+                <a href="editor.html?book=${bookName}&chapter=${selectionState.chapter}&verse=${selectionState.verse}" class="btn-edit">✏️ Editar</a>
+                <a href="editor.html?action=delete&book=${bookName}&chapter=${selectionState.chapter}&verse=${selectionState.verse}" class="btn-delete">🗑️ Borrar</a>
+            </div>`;
+
+            // Try automatic update via server first
+            try {
+                // Fetch the full book file first to insert the new verse
+                const bookResponse = await fetch(bookFilename);
+                if (!bookResponse.ok) throw new Error('No se pudo cargar el libro ' + bookFilename);
+                const bookHTML = await bookResponse.text();
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(bookHTML, 'text/html');
+
+                // 1. Find the chapter container
+                const chapterId = `${selectionState.chapter}`;
+                const chapterContainer = doc.getElementById(chapterId);
+
+                if (!chapterContainer) {
+                    throw new Error(`No se encontró el Capítulo ${chapterId} en ${bookFilename}. Verifica que el libro tenga esa sección.`);
+                }
+
+                // 2. Add verse to index grid if missing
+                const verseGrid = chapterContainer.querySelector('.verse-grid');
+                if (verseGrid) {
+                    const existingLink = verseGrid.querySelector(`a[href="#${verseId}"]`);
+                    if (!existingLink) {
+                        const vLink = doc.createElement('a');
+                        vLink.href = `#${verseId}`;
+                        vLink.className = 'v-link';
+                        vLink.textContent = selectionState.verse;
+                        verseGrid.appendChild(doc.createTextNode('\n                    '));
+                        verseGrid.appendChild(vLink);
+                    }
+                }
+
+                // 3. Insert the verse block
+                const returnTop = chapterContainer.querySelector('.return-top');
+                const tempDiv = doc.createElement('div');
+                tempDiv.innerHTML = verseBlockHTML.trim();
+                const newVerseBlock = tempDiv.firstElementChild;
+
+                if (returnTop) {
+                    chapterContainer.insertBefore(doc.createTextNode('\n\n            '), returnTop);
+                    chapterContainer.insertBefore(newVerseBlock, returnTop);
+                } else {
+                    chapterContainer.appendChild(newVerseBlock);
+                }
+
+                // Serialize and send to server
+                const serializer = new XMLSerializer();
+                const updatedHTML = serializer.serializeToString(doc);
+
+                const response = await fetch('http://localhost:3000/update-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: bookFilename,
+                        content: updatedHTML,
+                        commitMessage: `Nuevo comentario: ${selectionState.book.title} ${verseRef}`
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('✅ ¡Publicado automáticamente!\nEl comentario se insertó en ' + bookFilename + ' y se subió a GitHub.');
+                    return closeModal();
+                } else {
+                    throw new Error(result.error || 'Error desconocido en el servidor');
+                }
+            } catch (e) {
+                console.error('Error en automatización:', e);
+                const errorMsg = `❌ No se pudo publicar automáticamente.\n\nCausa: ${e.message}\n\nRECUERDA:\n1. El archivo "start-server.bat" debe estar ABIERTO.\n2. Debes usar la dirección http://localhost:3000/editor.html\n\n¿Quieres descargar el fragmento para pegarlo manualmente?`;
+
+                if (confirm(errorMsg)) {
+                    // Fallback: Original behavior for new commentaries (manual download)
+                    const filename = `${bookName}_${selectionState.chapter}_${selectionState.verse}_commentary.html`;
+                    const code = document.getElementById('outputCode').textContent;
+                    const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                }
+            }
+        }
+
+        async function updateBookFile() {
+            try {
+                // Get the updated content
+                const editor = document.getElementById('editor');
+                const updatedContent = editor.innerHTML;
+                const bibleText = document.getElementById('bibleVerseText').value;
+
+                // Parse the original book HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(editMode.originalHTML, 'text/html');
+
+                // Find and update the commentary section
+                const verseId = `${editMode.chapter}.${editMode.verse}`;
+                const verseBlock = doc.getElementById(verseId);
+
+                if (verseBlock) {
+                    const commentary = verseBlock.querySelector('.commentary');
+                    if (commentary) {
+                        // Update Bible text
+                        const verseTextElem = verseBlock.querySelector('.verse-text');
+                        if (verseTextElem) {
+                            verseTextElem.innerHTML = bibleText.replace(/\n/g, '<br>');
+                        }
+
+                        // Replace the commentary content
+                        commentary.innerHTML = updatedContent;
+
+                        // Ensure Borrar button is present
+                        if (!verseBlock.querySelector('.btn-delete')) {
+                            const btnDelete = doc.createElement('a');
+                            const bookName = editMode.bookName;
+                            btnDelete.href = `editor.html?action=delete&book=${bookName}&chapter=${editMode.chapter}&verse=${editMode.verse}`;
+                            btnDelete.className = 'btn-delete';
+                            btnDelete.textContent = '🗑️ Borrar';
+                            verseBlock.appendChild(doc.createTextNode('\n                '));
+                            verseBlock.appendChild(btnDelete);
+                        }
+                    }
+                }
+
+                // Serialize the updated document
+                const serializer = new XMLSerializer();
+                const updatedHTML = serializer.serializeToString(doc);
+
+                // Try automatic update via server first
+                try {
+                    const response = await fetch('http://localhost:3000/update-file', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            filename: `${editMode.bookName}.html`,
+                            content: updatedHTML,
+                            commitMessage: `Actualizado ${editMode.bookName} ${editMode.chapter}:${editMode.verse}`
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('✅ ¡Actualizado y Pujado a GitHub exitosamente!\nTu sitio se actualizará en unos instantes.');
+                        if (editMode.isEditing) {
+                            window.location.href = 'index.html';
+                        }
+                        return closeModal();
+                    }
+                } catch (e) {
+                    console.log('Servidor no disponible, usando descarga manual');
+                }
+
+                // Fallback: Download the complete updated book file
+                const blob = new Blob([updatedHTML], { type: 'text/html;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${editMode.bookName}.html`;
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+
+                alert(`Archivo actualizado localmente: ${editMode.bookName}.html\n\nEl servidor automático no está activo. Reemplaza el archivo manualmente.`);
+
+                // Close the modal
+                closeModal();
+            } catch (error) {
+                console.error('Error updating book file:', error);
+                alert('Error al actualizar el archivo. Por favor, intenta de nuevo.');
+            }
+        }
+
+        function copyToClipboard() {
+            const code = document.getElementById('outputCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('HTML copiado al portapapeles');
+            });
+        }
+
+        // Initialize
+        loadBooksData();
+
+        // Check if we're editing an existing verse
+        async function loadVerseForEditing() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const book = urlParams.get('book');
+            const chapter = urlParams.get('chapter');
+            const verse = urlParams.get('verse');
+
+            if (book && chapter && verse) {
+                // Set edit mode
+                editMode.isEditing = true;
+                editMode.bookName = book;
+                editMode.chapter = chapter;
+                editMode.verse = verse;
+
+                try {
+                    // Fetch the book HTML file
+                    const response = await fetch(`${book}.html`);
+                    const html = await response.text();
+
+                    // Store the original HTML for later update
+                    editMode.originalHTML = html;
+
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // Find the verse block
+                    const verseId = `${chapter}.${verse}`;
+                    const verseBlock = doc.getElementById(verseId);
+
+                    if (verseBlock) {
+                        // Extract the Bible text
+                        const verseTextElem = verseBlock.querySelector('.verse-text');
+                        if (verseTextElem) {
+                            const val = verseTextElem.innerHTML.replace(/<br\s*\/?>/gi, '\n').trim();
+                            document.getElementById('bibleVerseText').value = val;
+                            document.getElementById('fetchBibleBtn').style.display = 'inline-block';
+
+                            // Store current selection for fetch button
+                            selectionState.book = booksData.find(b => b.filename === `${book}.html`);
+                            selectionState.chapter = chapter;
+                            selectionState.verse = verse;
+
+                            // Auto-fetch if it's the generic placeholder
+                            if (val.includes("Texto bíblico de") || val === "") {
+                                fetchBibleText();
+                            }
+                        }
+
+                        // Extract the commentary content
+                        const commentary = verseBlock.querySelector('.commentary');
+                        if (commentary) {
+                            // Load the content into the editor
+                            const editor = document.getElementById('editor');
+                            editor.innerHTML = commentary.innerHTML;
+
+                            // Update the title to indicate editing mode
+                            document.querySelector('.editor-title').textContent = `Editando: ${book.charAt(0).toUpperCase() + book.slice(1)} ${chapter}:${verse}`;
+
+                            // Update the save button text
+                            const saveBtn = document.getElementById('publishBtn');
+                            if (saveBtn) {
+                                saveBtn.style.display = 'block';
+                                saveBtn.textContent = '🚀 Publicar en GitHub (Actualizar)';
+                                saveBtn.onclick = saveCommentary;
+                            }
+                            // Show delete button
+                            document.getElementById('deleteVerseBtn').style.display = 'block';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading verse for editing:', error);
+                }
+            }
+        }
+
+        // Load verse content if editing
+        loadVerseForEditing();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

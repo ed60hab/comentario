@@ -1,0 +1,21 @@
+# Archivos temporales
+temp_*.html
+*.tmp
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Carpetas de dependencias (si usas Node.js en el futuro)
+node_modules/

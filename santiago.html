@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comentarios - Santiago</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="./img/Saved_512.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&family=SBL+Hebrew&display=swap"
+        rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --accent-color: #3182ce;
+            --accent-hover: #2b6cb0;
+            --verse-num: #e53e3e;
+            --border-radius: 12px;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --font-main: 'Inter', system-ui, sans-serif;
+            --font-serif: 'Merriweather', serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            margin: 0;
+            padding-bottom: 60px;
+        }
+
+        /* Sticky Navbar */
+        .navbar {
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0.8rem 0;
+        }
+
+        .navbar-brand h4 {
+            color: var(--accent-color);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-color) !important;
+        }
+
+        .btn-return {
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            border-radius: 50px;
+            padding: 0.4rem 1.2rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-return:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Content Container */
+        .container {
+            max-width: 900px;
+            /* Reading width */
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+
+        /* Book Title Area */
+        .book-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .book-title {
+            font-family: var(--font-serif);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .book-subtitle {
+            font-family: 'SBL Hebrew', 'Ezra SIL', serif;
+            font-size: 1.8rem;
+            color: var(--text-secondary);
+            direction: rtl;
+        }
+
+        /* Chapters Grid */
+        .chapters-nav {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 3rem;
+        }
+
+        .chapters-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .chapters-grid,
+        .verse-grid {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            justify-content: flex-start;
+            /* Changed from center to Left align for better reading flow */
+        }
+
+        .ch-link,
+        .v-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: #edf2f7;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .v-link {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+        }
+
+        .ch-link:hover,
+        .v-link:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        /* Verse Block */
+        .chapter-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .verse-block {
+            margin-bottom: 2rem;
+        }
+
+        .verse-ref {
+            font-weight: 700;
+            color: var(--verse-num);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        .verse-text {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            color: #2d3748;
+        }
+
+        .commentary {
+            background-color: #f7fafc;
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .return-top {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .return-top a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid" style="max-width: 1200px;">
+            <a class="navbar-brand" href="index.html">
+                <h4>Comentarios</h4>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://thb.consoft.site/" target="_blank">Diccionario</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://bible.consoft.site" target="_blank">Comentarios</a>
+                    </li>
+                    <li class="nav-item ms-3">
+                        <a class="btn-return" href="index.html">Volver al Índice</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- Header -->
+        <div class="book-header" id="top">
+            <h1 class="book-title">SANTIAGO</h1>
+            <div class="book-subtitle">Ἰακώβου</div>
+        </div>
+
+        <!-- Chapters Grid -->
+        <nav class="chapters-nav">
+            <span class="chapters-title">Capítulos</span>
+            <div class="chapters-grid" id="chapter-grid">
+                <!-- START CHAPTER GRID -->
+                <a href="#1" class="ch-link">1</a>
+                <a href="#2" class="ch-link">2</a>
+                <a href="#3" class="ch-link">3</a>
+                <a href="#4" class="ch-link">4</a>
+                <a href="#5" class="ch-link">5</a>
+                <!-- END CHAPTER GRID -->
+            </div>
+        </nav>
+
+        <!-- Chapter 1 Content (Preserved from original) -->
+        <!-- START CHAPTER CONTENT -->
+
+        <div class="chapter-container" id="1">
+            <h2 class="chapter-title">Capítulo 1</h2>
+            
+            <nav class="verse-nav mb-4">
+                <span class="verse-nav-title">Versículos</span>
+                <div class="verse-grid">
+                    <a href="#1.1" class="v-link">1</a>
+                    <a href="#1.2" class="v-link">2</a>
+                    <a href="#1.3" class="v-link">3</a>
+                    <a href="#1.4" class="v-link">4</a>
+                    <a href="#1.5" class="v-link">5</a>
+                    <a href="#1.6" class="v-link">6</a>
+                    <a href="#1.7" class="v-link">7</a>
+                    <a href="#1.8" class="v-link">8</a>
+                    <a href="#1.9" class="v-link">9</a>
+                    <a href="#1.10" class="v-link">10</a>
+                    <a href="#1.11" class="v-link">11</a>
+                    <a href="#1.12" class="v-link">12</a>
+                    <a href="#1.13" class="v-link">13</a>
+                    <a href="#1.14" class="v-link">14</a>
+                    <a href="#1.15" class="v-link">15</a>
+                    <a href="#1.16" class="v-link">16</a>
+                    <a href="#1.17" class="v-link">17</a>
+                    <a href="#1.18" class="v-link">18</a>
+                    <a href="#1.19" class="v-link">19</a>
+                    <a href="#1.20" class="v-link">20</a>
+                    
+                </div>
+            </nav>
+
+            <div class="verse-block" id="1.1">
+                <span class="verse-ref">1:1</span>
+                <p class="verse-text">Texto bíblico de Santiago 1:1...</p>
+                <div class="commentary">
+                    <p>Espacio para comentarios del libro de Santiago.</p>
+                </div>
+            </div>
+            
+            <div class="return-top">
+                <a href="#top">↑ Volver Arriba</a>
+            </div>
+        </div>
+        
+<!-- END CHAPTER CONTENT -->
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

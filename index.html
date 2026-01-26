@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GGFY2CW2Q4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-GGFY2CW2Q4');
+    </script>
+    <!--Baner de consentimiento de Acceptrics-->
+    <script>
+        window.acceptrics = {};
+        localStorage.setItem("__acceptrics_conf", JSON.stringify({ "gcmAdvanced": true, "backgroundColor": "#333", "fontColor": "#ffffff", "geoArea": "worldwide", "accountNum": "8bavvtk8", "useTranslation": true, "bannerStyle": "", "ec": false })); document.addEventListener("__acceptrics_loaded", () => { window.acceptrics.initializeSettings(); });
+    </script>
+    <script src="https://cdn.acceptrics.com?n=8bavvtk8"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comentarios Bíblicos</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="512x512" href="/img/Saved_512.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&display=swap"
+        rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --accent-color: #3182ce;
+            /* Blue */
+            --accent-hover: #2b6cb0;
+            --ot-accent: #2c5282;
+            /* Darker Blue for OT */
+            --nt-accent: #e53e3e;
+            /* Red for NT */
+            --border-radius: 12px;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-serif: 'Merriweather', serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding-bottom: 40px;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand h4 {
+            font-weight: 700;
+            color: var(--accent-color);
+            margin: 0;
+            font-family: var(--font-main);
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: var(--text-secondary) !important;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--accent-color) !important;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+
+        /* Tabs */
+        .testament-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background-color: white;
+            border: 2px solid transparent;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .tab-btn.ot.active {
+            background-color: var(--ot-accent);
+        }
+
+        .tab-btn.nt.active {
+            background-color: var(--nt-accent);
+        }
+
+        /* Sections */
+        .section-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .section-title {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            display: inline-block;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #e2e8f0;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-left: 10px;
+            font-family: 'SBL Hebrew', 'Ezra SIL', serif;
+        }
+
+        /* Books Grid */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        /* Book Card Wrapper */
+        .book-card-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .btn-comment {
+            padding: 0.4rem 0.8rem;
+            background: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: block;
+        }
+
+        .btn-comment:hover {
+            background: var(--accent-hover);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* Book Card */
+        .book-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            border: 1px solid #edf2f7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .book-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--accent-color);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: transparent;
+        }
+
+        .book-card:hover::before {
+            opacity: 1;
+        }
+
+        .ot-section .book-card:hover::before {
+            background-color: var(--ot-accent);
+        }
+
+        .nt-section .book-card:hover::before {
+            background-color: var(--nt-accent);
+        }
+
+        /* Typography inside cards */
+        .original-text {
+            font-family: 'SBL Hebrew', 'SBL Greek', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            line-height: 1.2;
+        }
+
+        .nt-section .original-text {
+            font-size: 1.6rem;
+            /* Greek slightly smaller */
+        }
+
+        .book-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .chapter-count {
+            font-size: 0.875rem;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 1rem;
+            }
+
+            .navbar-brand h4 {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Show/Hide Logic */
+        .bible-section {
+            display: none;
+            /* Hidden by default, JS toggles this */
+            animation: fadeIn 0.5s ease;
+        }
+
+        .bible-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <h4>&nbsp;&nbsp;Comentarios Bíblicos</h4>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
+                    aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarText">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="http://thb.consoft.site/" target="_blank">Diccionario</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="http://lexicon.consoft.site/" target="_blank">Por frecuencia</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="http://parser.consoft.site" target="_blank">Parser</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="http://weak.consoft.site" target="_blank">Verbos débiles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="http://wlc.consoft.site" target="_blank">WLC/LBLA</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="http://bible.consoft.site" target="_blank">Comentarios</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="editor.html"
+                                style="background: var(--accent-color); color: white !important; padding: 0.4rem 1rem; border-radius: 6px; margin-left: 0.5rem;">✍️
+                                Comentar</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" style="color: var(--accent-color) !important;"
+                                href="http://links.consoft.site" target="_blank"><strong>ConSoft</strong> 🏠</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="main-container">
+
+        <div class="testament-tabs">
+            <button class="tab-btn ot active" onclick="showTestament('ot', this)">Antiguo Testamento</button>
+            <button class="tab-btn nt" onclick="showTestament('nt', this)">Nuevo Testamento</button>
+        </div>
+
+        <!-- OLD TESTAMENT CONTAINER -->
+        <div id="ot-container" class="bible-section active ot-section">
+
+            <!-- TORAH -->
+            <div class="testament-sub-section">
+                <div class="section-header">
+                    <h2 class="section-title">Torá (La Ley)</h2>
+                    <span class="section-subtitle">תּוֹרָה</span>
+                </div>
+                <div class="books-grid">
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=genesis" class="btn-comment">✍️ Comentar</a>
+                        <a href="genesis.html" class="book-card">
+                            <div class="original-text">בְּרֵאשִׁית</div>
+                            <div class="book-title">Génesis</div>
+                            <div class="chapter-count">50 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=exodo" class="btn-comment">✍️ Comentar</a>
+                        <a href="exodo.html" class="book-card">
+                            <div class="original-text">שְׁמוֹת</div>
+                            <div class="book-title">Éxodo</div>
+                            <div class="chapter-count">40 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=levitico" class="btn-comment">✍️ Comentar</a>
+                        <a href="levitico.html" class="book-card">
+                            <div class="original-text">וַיִּקְרָא</div>
+                            <div class="book-title">Levítico</div>
+                            <div class="chapter-count">27 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=numeros" class="btn-comment">✍️ Comentar</a>
+                        <a href="numeros.html" class="book-card">
+                            <div class="original-text">בְּמִדְבַּר</div>
+                            <div class="book-title">Números</div>
+                            <div class="chapter-count">36 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=deuteronomio" class="btn-comment">✍️ Comentar</a>
+                        <a href="deuteronomio.html" class="book-card">
+                            <div class="original-text">דְּבָרִים</div>
+                            <div class="book-title">Deuteronomio</div>
+                            <div class="chapter-count">34 capítulos</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEVI'IM -->
+            <div class="testament-sub-section">
+                <div class="section-header">
+                    <h2 class="section-title">Nevi'im (Profetas)</h2>
+                    <span class="section-subtitle">נְבִיאִים</span>
+                </div>
+                <div class="books-grid">
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=josue" class="btn-comment">✍️ Comentar</a>
+                        <a href="josue.html" class="book-card">
+                            <div class="original-text">יְהוֹשֻׁעַ</div>
+                            <div class="book-title">Josué</div>
+                            <div class="chapter-count">24 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=jueces" class="btn-comment">✍️ Comentar</a>
+                        <a href="jueces.html" class="book-card">
+                            <div class="original-text">שׁוֹפְטִים</div>
+                            <div class="book-title">Jueces</div>
+                            <div class="chapter-count">21 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=1samuel" class="btn-comment">✍️ Comentar</a>
+                        <a href="1samuel.html" class="book-card">
+                            <div class="original-text">שְׁמוּאֵל א</div>
+                            <div class="book-title">1 Samuel</div>
+                            <div class="chapter-count">31 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=2samuel" class="btn-comment">✍️ Comentar</a>
+                        <a href="2samuel.html" class="book-card">
+                            <div class="original-text">שְׁמוּאֵל ב</div>
+                            <div class="book-title">2 Samuel</div>
+                            <div class="chapter-count">24 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=1reyes" class="btn-comment">✍️ Comentar</a>
+                        <a href="1reyes.html" class="book-card">
+                            <div class="original-text">מְלָכִים א</div>
+                            <div class="book-title">1 Reyes</div>
+                            <div class="chapter-count">22 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=2reyes" class="btn-comment">✍️ Comentar</a>
+                        <a href="2reyes.html" class="book-card">
+                            <div class="original-text">מְלָכִים ב</div>
+                            <div class="book-title">2 Reyes</div>
+                            <div class="chapter-count">25 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=isaias" class="btn-comment">✍️ Comentar</a>
+                        <a href="isaias.html" class="book-card">
+                            <div class="original-text">יְשַׁעְיָהוּ</div>
+                            <div class="book-title">Isaías</div>
+                            <div class="chapter-count">66 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=jeremias" class="btn-comment">✍️ Comentar</a>
+                        <a href="jeremias.html" class="book-card">
+                            <div class="original-text">יִרְמְיָהוּ</div>
+                            <div class="book-title">Jeremías</div>
+                            <div class="chapter-count">52 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=ezequiel" class="btn-comment">✍️ Comentar</a>
+                        <a href="ezequiel.html" class="book-card">
+                            <div class="original-text">יְחֶזְקֵאל</div>
+                            <div class="book-title">Ezequiel</div>
+                            <div class="chapter-count">48 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=oseas" class="btn-comment">✍️ Comentar</a>
+                        <a href="oseas.html" class="book-card">
+                            <div class="original-text">הוֹשֵׁעַ</div>
+                            <div class="book-title">Oseas</div>
+                            <div class="chapter-count">14 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=joel" class="btn-comment">✍️ Comentar</a>
+                        <a href="joel.html" class="book-card">
+                            <div class="original-text">יוֹאֵל</div>
+                            <div class="book-title">Joel</div>
+                            <div class="chapter-count">3 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=amos" class="btn-comment">✍️ Comentar</a>
+                        <a href="amos.html" class="book-card">
+                            <div class="original-text">עָמוֹס</div>
+                            <div class="book-title">Amós</div>
+                            <div class="chapter-count">9 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=abdias" class="btn-comment">✍️ Comentar</a>
+                        <a href="abdias.html" class="book-card">
+                            <div class="original-text">עֹבַדְיָה</div>
+                            <div class="book-title">Abdías</div>
+                            <div class="chapter-count">1 capítulo</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=jonas" class="btn-comment">✍️ Comentar</a>
+                        <a href="jonas.html" class="book-card">
+                            <div class="original-text">יוֹנָה</div>
+                            <div class="book-title">Jonás</div>
+                            <div class="chapter-count">4 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=miqueas" class="btn-comment">✍️ Comentar</a>
+                        <a href="miqueas.html" class="book-card">
+                            <div class="original-text">מִיכָה</div>
+                            <div class="book-title">Miqueas</div>
+                            <div class="chapter-count">7 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=nahum" class="btn-comment">✍️ Comentar</a>
+                        <a href="nahum.html" class="book-card">
+                            <div class="original-text">נַחוּם</div>
+                            <div class="book-title">Nahúm</div>
+                            <div class="chapter-count">3 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=habacuc" class="btn-comment">✍️ Comentar</a>
+                        <a href="habacuc.html" class="book-card">
+                            <div class="original-text">חֲבַקּוּק</div>
+                            <div class="book-title">Habacuc</div>
+                            <div class="chapter-count">3 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=sofonias" class="btn-comment">✍️ Comentar</a>
+                        <a href="sofonias.html" class="book-card">
+                            <div class="original-text">צְפַנְיָה</div>
+                            <div class="book-title">Sofonías</div>
+                            <div class="chapter-count">3 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=hageo" class="btn-comment">✍️ Comentar</a>
+                        <a href="hageo.html" class="book-card">
+                            <div class="original-text">חַגַּי</div>
+                            <div class="book-title">Hageo</div>
+                            <div class="chapter-count">2 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=zacarias" class="btn-comment">✍️ Comentar</a>
+                        <a href="zacarias.html" class="book-card">
+                            <div class="original-text">זְכַרְיָה</div>
+                            <div class="book-title">Zacarías</div>
+                            <div class="chapter-count">14 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=malaquias" class="btn-comment">✍️ Comentar</a>
+                        <a href="malaquias.html" class="book-card">
+                            <div class="original-text">מַלְאָכִי</div>
+                            <div class="book-title">Malaquías</div>
+                            <div class="chapter-count">4 capítulos</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KETUVIM -->
+            <div class="testament-sub-section">
+                <div class="section-header">
+                    <h2 class="section-title">Ketuvim (Escritos)</h2>
+                    <span class="section-subtitle">כְּתוּבִים</span>
+                </div>
+                <div class="books-grid">
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=salmos" class="btn-comment">✍️ Comentar</a>
+                        <a href="salmos.html" class="book-card">
+                            <div class="original-text">תְּהִלִּים</div>
+                            <div class="book-title">Salmos</div>
+                            <div class="chapter-count">150 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=proverbios" class="btn-comment">✍️ Comentar</a>
+                        <a href="proverbios.html" class="book-card">
+                            <div class="original-text">מִשְׁלֵי</div>
+                            <div class="book-title">Proverbios</div>
+                            <div class="chapter-count">31 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=job" class="btn-comment">✍️ Comentar</a>
+                        <a href="job.html" class="book-card">
+                            <div class="original-text">אִיּוֹב</div>
+                            <div class="book-title">Job</div>
+                            <div class="chapter-count">42 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=cantares" class="btn-comment">✍️ Comentar</a>
+                        <a href="cantares.html" class="book-card">
+                            <div class="original-text">שִׁיר הַשִּׁירִים</div>
+                            <div class="book-title">Cantar de los Cantares</div>
+                            <div class="chapter-count">8 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=rut" class="btn-comment">✍️ Comentar</a>
+                        <a href="rut.html" class="book-card">
+                            <div class="original-text">רוּת</div>
+                            <div class="book-title">Rut</div>
+                            <div class="chapter-count">4 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=lamentaciones" class="btn-comment">✍️ Comentar</a>
+                        <a href="lamentaciones.html" class="book-card">
+                            <div class="original-text">אֵיכָה</div>
+                            <div class="book-title">Lamentaciones</div>
+                            <div class="chapter-count">5 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=eclesiastes" class="btn-comment">✍️ Comentar</a>
+                        <a href="eclesiastes.html" class="book-card">
+                            <div class="original-text">קֹהֶלֶת</div>
+                            <div class="book-title">Eclesiastés</div>
+                            <div class="chapter-count">12 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=ester" class="btn-comment">✍️ Comentar</a>
+                        <a href="ester.html" class="book-card">
+                            <div class="original-text">אֶסְתֵּר</div>
+                            <div class="book-title">Ester</div>
+                            <div class="chapter-count">10 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=daniel" class="btn-comment">✍️ Comentar</a>
+                        <a href="daniel.html" class="book-card">
+                            <div class="original-text">דָּנִיֵּאל</div>
+                            <div class="book-title">Daniel</div>
+                            <div class="chapter-count">12 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=esdras" class="btn-comment">✍️ Comentar</a>
+                        <a href="esdras.html" class="book-card">
+                            <div class="original-text">עֶזְרָא</div>
+                            <div class="book-title">Esdras</div>
+                            <div class="chapter-count">10 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=nehemias" class="btn-comment">✍️ Comentar</a>
+                        <a href="nehemias.html" class="book-card">
+                            <div class="original-text">נְחֶמְיָה</div>
+                            <div class="book-title">Nehemías</div>
+                            <div class="chapter-count">13 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=1cronicas" class="btn-comment">✍️ Comentar</a>
+                        <a href="1cronicas.html" class="book-card">
+                            <div class="original-text">דִּבְרֵי הַיָּמִים א</div>
+                            <div class="book-title">1 Crónicas</div>
+                            <div class="chapter-count">29 capítulos</div>
+                        </a>
+                    </div>
+                    <div class="book-card-wrapper">
+                        <a href="editor.html?book=2cronicas" class="btn-comment">✍️ Comentar</a>
+                        <a href="2cronicas.html" class="book-card">
+                            <div class="original-text">דִּבְרֵי הַיָּמִים ב</div>
+                            <div class="book-title">2 Crónicas</div>
+                            <div class="chapter-count">36 capítulos</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- NEW TESTAMENT CONTAINER -->
+        <div id="nt-container" class="bible-section nt-section">
+            <div class="section-header">
+                <h2 class="section-title">Nuevo Testamento</h2>
+                <span class="section-subtitle">Καινή Διαθήκη</span>
+            </div>
+
+            <div class="books-grid">
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=mateo" class="btn-comment">✍️ Comentar</a>
+                        <a href="mateo.html" class="book-card">
+                            <div class="original-text">Κατὰ Ματθαῖον</div>
+                            <div class="book-title">Mateo</div>
+                            <div class="chapter-count">28 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=marcos" class="btn-comment">✍️ Comentar</a>
+                        <a href="marcos.html" class="book-card">
+                            <div class="original-text">Κατὰ Μᾶρκον</div>
+                            <div class="book-title">Marcos</div>
+                            <div class="chapter-count">16 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=lucas" class="btn-comment">✍️ Comentar</a>
+                        <a href="lucas.html" class="book-card">
+                            <div class="original-text">Κατὰ Λουκᾶν</div>
+                            <div class="book-title">Lucas</div>
+                            <div class="chapter-count">24 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=juan" class="btn-comment">✍️ Comentar</a>
+                        <a href="juan.html" class="book-card">
+                            <div class="original-text">Κατὰ Ἰωάννην</div>
+                            <div class="book-title">Juan</div>
+                            <div class="chapter-count">21 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=hechos" class="btn-comment">✍️ Comentar</a>
+                        <a href="hechos.html" class="book-card">
+                            <div class="original-text">Πράξεις Ἀποστόλων</div>
+                            <div class="book-title">Hechos</div>
+                            <div class="chapter-count">28 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=romanos" class="btn-comment">✍️ Comentar</a>
+                        <a href="romanos.html" class="book-card">
+                            <div class="original-text">Πρὸς Ῥωμαίους</div>
+                            <div class="book-title">Romanos</div>
+                            <div class="chapter-count">16 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=1corintios" class="btn-comment">✍️ Comentar</a>
+                        <a href="1corintios.html" class="book-card">
+                            <div class="original-text">Πρὸς Κορινθίους Α</div>
+                            <div class="book-title">1 Corintios</div>
+                            <div class="chapter-count">16 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=2corintios" class="btn-comment">✍️ Comentar</a>
+                        <a href="2corintios.html" class="book-card">
+                            <div class="original-text">Πρὸς Κορινθίους Β</div>
+                            <div class="book-title">2 Corintios</div>
+                            <div class="chapter-count">13 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=galatas" class="btn-comment">✍️ Comentar</a>
+                        <a href="galatas.html" class="book-card">
+                            <div class="original-text">Πρὸς Γαλάτας</div>
+                            <div class="book-title">Gálatas</div>
+                            <div class="chapter-count">6 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=efesios" class="btn-comment">✍️ Comentar</a>
+                        <a href="efesios.html" class="book-card">
+                            <div class="original-text">Πρὸς Ἐφεσίους</div>
+                            <div class="book-title">Efesios</div>
+                            <div class="chapter-count">6 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=filipenses" class="btn-comment">✍️ Comentar</a>
+                        <a href="filipenses.html" class="book-card">
+                            <div class="original-text">Πρὸς Φιλιππησίους</div>
+                            <div class="book-title">Filipenses</div>
+                            <div class="chapter-count">4 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=colosenses" class="btn-comment">✍️ Comentar</a>
+                        <a href="colosenses.html" class="book-card">
+                            <div class="original-text">Πρὸς Κολοσσαεῖς</div>
+                            <div class="book-title">Colosenses</div>
+                            <div class="chapter-count">4 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=1tesalonicenses" class="btn-comment">✍️ Comentar</a>
+                        <a href="1tesalonicenses.html" class="book-card">
+                            <div class="original-text">Πρὸς Θεσσαλονικεῖς Α</div>
+                            <div class="book-title">1 Tesalonicenses</div>
+                            <div class="chapter-count">5 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=2tesalonicenses" class="btn-comment">✍️ Comentar</a>
+                        <a href="2tesalonicenses.html" class="book-card">
+                            <div class="original-text">Πρὸς Θεσσαλονικεῖς Β</div>
+                            <div class="book-title">2 Tesalonicenses</div>
+                            <div class="chapter-count">3 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=1timoteo" class="btn-comment">✍️ Comentar</a>
+                        <a href="1timoteo.html" class="book-card">
+                            <div class="original-text">Πρὸς Τιμόθεον Α</div>
+                            <div class="book-title">1 Timoteo</div>
+                            <div class="chapter-count">6 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=2timoteo" class="btn-comment">✍️ Comentar</a>
+                        <a href="2timoteo.html" class="book-card">
+                            <div class="original-text">Πρὸς Τιμόθεον Β</div>
+                            <div class="book-title">2 Timoteo</div>
+                            <div class="chapter-count">4 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=tito" class="btn-comment">✍️ Comentar</a>
+                        <a href="tito.html" class="book-card">
+                            <div class="original-text">Πρὸς Τίτον</div>
+                            <div class="book-title">Tito</div>
+                            <div class="chapter-count">3 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=filemon" class="btn-comment">✍️ Comentar</a>
+                        <a href="filemon.html" class="book-card">
+                            <div class="original-text">Πρὸς Φιλήμονα</div>
+                            <div class="book-title">Filemón</div>
+                            <div class="chapter-count">1 capítulo</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=hebreos" class="btn-comment">✍️ Comentar</a>
+                        <a href="hebreos.html" class="book-card">
+                            <div class="original-text">Πρὸς Ἑβραίους</div>
+                            <div class="book-title">Hebreos</div>
+                            <div class="chapter-count">13 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=santiago" class="btn-comment">✍️ Comentar</a>
+                        <a href="santiago.html" class="book-card">
+                            <div class="original-text">Ἰακώβου</div>
+                            <div class="book-title">Santiago</div>
+                            <div class="chapter-count">5 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=1pedro" class="btn-comment">✍️ Comentar</a>
+                        <a href="1pedro.html" class="book-card">
+                            <div class="original-text">Πέτρου Α</div>
+                            <div class="book-title">1 Pedro</div>
+                            <div class="chapter-count">5 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=2pedro" class="btn-comment">✍️ Comentar</a>
+                        <a href="2pedro.html" class="book-card">
+                            <div class="original-text">Πέτρου Β</div>
+                            <div class="book-title">2 Pedro</div>
+                            <div class="chapter-count">3 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=1juan" class="btn-comment">✍️ Comentar</a>
+                        <a href="1juan.html" class="book-card">
+                            <div class="original-text">Ἰωάννου Α</div>
+                            <div class="book-title">1 Juan</div>
+                            <div class="chapter-count">5 capítulos</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=2juan" class="btn-comment">✍️ Comentar</a>
+                        <a href="2juan.html" class="book-card">
+                            <div class="original-text">Ἰωάννου Β</div>
+                            <div class="book-title">2 Juan</div>
+                            <div class="chapter-count">1 capítulo</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=3juan" class="btn-comment">✍️ Comentar</a>
+                        <a href="3juan.html" class="book-card">
+                            <div class="original-text">Ἰωάννου Γ</div>
+                            <div class="book-title">3 Juan</div>
+                            <div class="chapter-count">1 capítulo</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=judas" class="btn-comment">✍️ Comentar</a>
+                        <a href="judas.html" class="book-card">
+                            <div class="original-text">Ἰούδα</div>
+                            <div class="book-title">Judas</div>
+                            <div class="chapter-count">1 capítulo</div>
+                        </a>
+                    </div>
+                <div class="book-card-wrapper">
+                        <a href="editor.html?book=apocalipsis" class="btn-comment">✍️ Comentar</a>
+                        <a href="apocalipsis.html" class="book-card">
+                            <div class="original-text">Ἀποκάλυψις</div>
+                            <div class="book-title">Apocalipsis</div>
+                            <div class="chapter-count">22 capítulos</div>
+                        </a>
+                    </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Comentarios Bíblicos</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showTestament(testament, btn) {
+            // Hide all sections
+            document.querySelectorAll('.bible-section').forEach(el => el.classList.remove('active'));
+
+            // Show selected
+            document.getElementById(testament + '-container').classList.add('active');
+
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    </script>
+</body>
+
+</html>
