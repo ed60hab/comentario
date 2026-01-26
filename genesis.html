@@ -1,0 +1,535 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comentarios - Génesis</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="./img/Saved_512.png" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Merriweather:wght@300;400;700&amp;family=SBL+Hebrew&amp;display=swap" rel="stylesheet" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --accent-color: #3182ce;
+            --accent-hover: #2b6cb0;
+            --verse-num: #e53e3e;
+            --border-radius: 12px;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --font-main: 'Inter', system-ui, sans-serif;
+            --font-serif: 'Merriweather', serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            margin: 0;
+            padding-bottom: 60px;
+        }
+
+        /* Sticky Navbar */
+        .navbar {
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0.8rem 0;
+        }
+
+        .navbar-brand h4 {
+            color: var(--accent-color);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-color) !important;
+        }
+
+        .btn-return {
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            border-radius: 50px;
+            padding: 0.4rem 1.2rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-return:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Content Container */
+        .container {
+            max-width: 900px;
+            /* Reading width */
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+
+        /* Book Title Area */
+        .book-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .book-title {
+            font-family: var(--font-serif);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .book-subtitle {
+            font-family: 'SBL Hebrew', 'Ezra SIL', serif;
+            font-size: 1.8rem;
+            color: var(--text-secondary);
+            direction: rtl;
+        }
+
+        /* Chapters Grid */
+        .chapters-nav {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 3rem;
+        }
+
+        .chapters-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .chapters-grid,
+        .verse-grid {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            justify-content: flex-start;
+            /* Changed from center to Left align for better reading flow */
+        }
+
+        .ch-link,
+        .v-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: #edf2f7;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .v-link {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+        }
+
+        .ch-link:hover,
+        .v-link:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        /* Verse Block */
+        .chapter-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .verse-block {
+            margin-bottom: 2rem;
+        }
+
+        .verse-ref {
+            font-weight: 700;
+            color: var(--verse-num);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        .verse-text {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            color: #2d3748;
+        }
+
+        .commentary {
+            background-color: #f7fafc;
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .return-top {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .return-top a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-edit {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-edit:hover {
+            background: var(--accent-hover);
+            color: white;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid" style="max-width: 1200px;">
+            <a class="navbar-brand" href="index.html">
+                <h4>Comentarios</h4>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://thb.consoft.site/" target="_blank">Diccionario</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://bible.consoft.site" target="_blank">Comentarios</a>
+                    </li>
+                    <li class="nav-item ms-3">
+                        <a class="btn-return" href="index.html">Volver al Índice</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- Header -->
+        <div class="book-header" id="top">
+            <h1 class="book-title">GÉNESIS</h1>
+            <div class="book-subtitle">בְּרֵאשִׁית</div>
+        </div>
+
+        <!-- Chapters Grid -->
+        <nav class="chapters-nav">
+            <span class="chapters-title">Capítulos</span>
+            <div class="chapters-grid" id="chapter-grid">
+                <!-- START CHAPTER GRID -->
+                <a href="#1" class="ch-link">1</a>
+                <a href="#2" class="ch-link">2</a>
+                <a href="#3" class="ch-link">3</a>
+                <a href="#4" class="ch-link">4</a>
+                <a href="#5" class="ch-link">5</a>
+                <a href="#6" class="ch-link">6</a>
+                <a href="#7" class="ch-link">7</a>
+                <a href="#8" class="ch-link">8</a>
+                <a href="#9" class="ch-link">9</a>
+                <a href="#10" class="ch-link">10</a>
+                <a href="#11" class="ch-link">11</a>
+                <a href="#12" class="ch-link">12</a>
+                <a href="#13" class="ch-link">13</a>
+                <a href="#14" class="ch-link">14</a>
+                <a href="#15" class="ch-link">15</a>
+                <a href="#16" class="ch-link">16</a>
+                <a href="#17" class="ch-link">17</a>
+                <a href="#18" class="ch-link">18</a>
+                <a href="#19" class="ch-link">19</a>
+                <a href="#20" class="ch-link">20</a>
+                <a href="#21" class="ch-link">21</a>
+                <a href="#22" class="ch-link">22</a>
+                <a href="#23" class="ch-link">23</a>
+                <a href="#24" class="ch-link">24</a>
+                <a href="#25" class="ch-link">25</a>
+                <a href="#26" class="ch-link">26</a>
+                <a href="#27" class="ch-link">27</a>
+                <a href="#28" class="ch-link">28</a>
+                <a href="#29" class="ch-link">29</a>
+                <a href="#30" class="ch-link">30</a>
+                <a href="#31" class="ch-link">31</a>
+                <a href="#32" class="ch-link">32</a>
+                <a href="#33" class="ch-link">33</a>
+                <a href="#34" class="ch-link">34</a>
+                <a href="#35" class="ch-link">35</a>
+                <a href="#36" class="ch-link">36</a>
+                <a href="#37" class="ch-link">37</a>
+                <a href="#38" class="ch-link">38</a>
+                <a href="#39" class="ch-link">39</a>
+                <a href="#40" class="ch-link">40</a>
+                <a href="#41" class="ch-link">41</a>
+                <a href="#42" class="ch-link">42</a>
+                <a href="#43" class="ch-link">43</a>
+                <a href="#44" class="ch-link">44</a>
+                <a href="#45" class="ch-link">45</a>
+                <a href="#46" class="ch-link">46</a>
+                <a href="#47" class="ch-link">47</a>
+                <a href="#48" class="ch-link">48</a>
+                <a href="#49" class="ch-link">49</a>
+                <a href="#50" class="ch-link">50</a>
+                <!-- END CHAPTER GRID -->
+            </div>
+        </nav>
+
+        <!-- Chapter 1 Content (Preserved from original) -->
+        <!-- START CHAPTER CONTENT -->
+        <div class="chapter-container" id="1">
+            <h2 class="chapter-title">Capítulo 1</h2>
+
+            <nav class="verse-nav mb-4">
+                <span class="verse-nav-title">Versículos</span>
+                <div class="verse-grid">
+                    <a href="#1.1" class="v-link">1</a>
+                    <a href="#1.2" class="v-link">2</a>
+                    <a href="#1.3" class="v-link">3</a>
+                    <a href="#1.4" class="v-link">4</a>
+                    <a href="#1.5" class="v-link">5</a>
+                
+                    <a href="#1.6" class="v-link">6</a></div>
+            </nav>
+
+            <!-- Verse 1.1 -->
+            <div class="verse-block" id="1.1">
+                <span class="verse-ref">1:1</span>
+                <p class="verse-text">En el principio creó Dios los cielos y la tierra.</p>
+                <div class="commentary">
+                    <p>Hasta el instante que Génesis define como “el principio”, no existía nada. Sólo Dios.</p>
+                    <p>Cómo jamás hemos experimentado la nada, es muy difícil abstraerse hasta concebir la ausencia de
+                        todo lo que conocemos,
+                        incluyendo el espacio y el tiempo, a la vez, hemos de ignorar el continuo flujo de información
+                        que nos llega a través
+                        de los sentidos, mientras bullen en nuestra mente pensamientos que no cesan, que dibujan
+                        imágenes y susurran ideas.
+                    </p>
+                    <p><em>Compartiendo un método:</em></p>
+                    <p>El recurso que uso para imaginar la nada, es pensar que estoy flotando en el espacio junto a la
+                        tierra,
+                        la veo con todo detalle, tengo el sol a mis espaldas, puedo ver la luna y me encuentro rodeado
+                        de millones de estrellas.
+                        Dejo entonces de ver la tierra y seguidamente desaparecen la luna y el sol. Sólo quedan las
+                        estrellas que me rodean.
+                        Hago un breve giro y comprendo que los conceptos de arriba y abajo, ahora dependen de la
+                        posición de mi cabeza y mis pies.
+                        Si extiendo los brazos no puedo tocar nada. Desaparecen las estrellas, sigo flotando en absoluta
+                        oscuridad y silencio,
+                        sólo siento mi cuerpo. Me detengo un instante para comprender la idea de que ahora "todo" está
+                        limitado a las fronteras de
+                        este cuerpo ciego y sordo, porque no existe nada más.
+                        Finalmente, desaparece mi cuerpo, queda mi conciencia. Es la nada. Junto al espacio, también se
+                        esfumaron las referencias
+                        temporales. Tampoco hay tiempo.</p>
+                    <p><em>Creó Dios</em></p>
+                    <p>Cuando Dios hizo aparecer los cielos y la tierra, establece el espacio como dimensión. Dios creó
+                        de la nada (<i>exnihilo</i>).
+                        No hay nada que se asemeje al acto creativo de Dios. El hombre crea transformando algo
+                        existente.
+                        Ya sea barro en vasija, o materiales diversos en una estructura compleja, necesita de algo
+                        creado para completar su proyecto.
+                        Dios creó de la nada, de modo que no tiene sentido intentar explicar ese proceso aplicando una
+                        sistemática producida por
+                        nuestra rudimentaria lógica.
+                    </p>
+                </div>
+                <a href="editor.html?book=genesis&amp;chapter=1&amp;verse=1" class="btn-edit">✏️ Editar</a>
+            </div>
+
+            <!-- Verse 1.2 -->
+            <div class="verse-block" id="1.2">
+                <span class="verse-ref">1:2</span>
+                <p class="verse-text">Y la tierra estaba sin orden y vacía, y las tinieblas cubrían la superficie del
+                    abismo, y el Espíritu de Dios se movía sobre la superficie de las aguas.</p>
+                <div class="commentary">
+                    <p>El verso segundo del Génesis se enfoca en la tierra. Describe que aún estaba sin forma, inerte.
+                        Era el primordio desde el que
+                        Dios iría conformando lo que sería el planeta que conocemos.
+                    </p>
+                    <p>Suponiendo que Dios nos hubiese permitido asistir como espectador al acto de creación, tendríamos
+                        que hacerlo en términos muy
+                        diferentes a los que concebimos. No “veríamos” ese acto, no sólo porque no tendríamos sentidos
+                        para apreciarlo,
+                        sino porque aún no existía la luz. Dice literalmente: “y las tinieblas estaban frente al abismo”
+                        (וְחֹשֶׁךְ עַל־פְּנֵי תְהוֹם)
+                        Si pudiésemos palpar el suelo de esa tierra sin forma y vacía, lo haríamos en la más absoluta
+                        oscuridad y frente a nosotros,
+                        el abismo.
+                    </p>
+                    <p>A continuación, el verso nos dice que el Espíritu de Dios estaba allí y que se movía (מְרַחֶפֶת)
+                        (se cernía, permanecía suspendido
+                        o flotaba) sobre la superficie de las aguas que había creado.</p>
+                </div>
+                <a href="editor.html?book=genesis&amp;chapter=1&amp;verse=2" class="btn-edit">✏️ Editar</a>
+            </div>
+
+            <!-- Verse 1.3 -->
+            <div class="verse-block" id="1.3">
+                <span class="verse-ref">1:3</span>
+                <p class="verse-text">Entonces dijo Dios: Sea la luz. Y hubo luz.</p>
+                <div class="commentary">
+                    <p>Dios, crea la luz por su palabra. Dijo y fue. Algo así puede ser creído, pero no comprendido. Los
+                        primeros versos de
+                        la Biblia invitan al lector a creer. Si es capaz de hacerlo, el resto de la Palabra irá cobrando
+                        sentido y podrá desplegar
+                        su efecto instructivo y transformador a medida que desee conocer más, pero ello depende de la
+                        disposición a creer de quien
+                        comienza a leer.</p>
+                    <p>La luz que crea Dios por su palabra es anterior y, por tanto, distinta de la luz del sol, que aún
+                        no había sido creado.</p>
+                </div>
+                <a href="editor.html?book=genesis&amp;chapter=1&amp;verse=3" class="btn-edit">✏️ Editar</a>
+            </div>
+
+            <!-- Verse 1.4 -->
+            <div class="verse-block" id="1.4">
+                <span class="verse-ref">1:4</span>
+                <p class="verse-text">Y vio Dios que la luz era buena; y separó Dios la luz de las tinieblas.</p>
+                <div class="commentary">
+                    <p>Dios define la luz como buena. La expresión “Y vio Dios”, no significa que, al crearla, se dio
+                        cuenta de que era buena,
+                        sino que define que lo era. La luz sale de Él. Sabía que era buena, pero nos lo dice,
+                        estableciendo que hay cosas buenas y
+                        otras que no lo son. Seguidamente, la separa de las tinieblas, definiendo dos categorías que,
+                        aunque existen al mismo tiempo,
+                        están separadas.</p>
+                    <p>Esta Luz que sale de Dios, que la declara como buena, que queda separada de las tinieblas y que
+                        existe antes que el sol,
+                        nos conecta directamente con Jesús.</p>
+                    <p><em>Juan 1:4-5 "En él estaba la vida, y la vida era la luz de los hombres. Y la luz brilla en las
+                            tinieblas, y las tinieblas
+                            no la comprendieron”. (LBLA) </em></p>
+                    <p><em>Juan 8:12 “Jesús les habló otra vez, diciendo: Yo soy la luz del mundo; el que me sigue no
+                            andará en tinieblas,
+                            sino que tendrá la luz de la vida”. (LBLA)</em></p>
+                    <p><em>Juan 12:46 “Yo, la luz, he venido al mundo, para que todo el que cree en mí no permanezca en
+                            tinieblas”. (LBLA)</em></p>
+                    <p><em>1 Juan 1:5 "Y este es el mensaje que hemos oído de él, y que os anunciamos: Dios es luz, y en
+                            Él no hay tiniebla alguna". (LBLA)</em></p>
+                </div>
+                <a href="editor.html?book=genesis&amp;chapter=1&amp;verse=4" class="btn-edit">✏️ Editar</a>
+            </div>
+
+            <!-- Verse 1.5 -->
+            <div class="verse-block" id="1.5">
+                <span class="verse-ref">1:5</span>
+                <p class="verse-text">Y llamó Dios a la luz día, y a las tinieblas llamó noche. Y fue la tarde y fue la
+                    mañana: un día.</p>
+                <div class="commentary">
+                    <p>Dios nombra a la luz día y a la oscuridad noche. Esto no es un designio astronómico. Aún el sol
+                        no había sido creado, de manera
+                        que no debemos pensar en la sucesión de un día brillante, con nubes y luego en una noche
+                        estrellada. Sólo en luz y oscuridad.
+                        A continuación, dice que hubo tarde y mañana, en un orden distinto al que, de forma natural,
+                        ocurre cada día, lo que puede ser
+                        entendido como dos momentos de la luz (día). Esto establece la primera sucesión temporal, por
+                        tanto, inaugura el tiempo.
+                        Literalmente en hebreo, día uno o primero (יוֹם אֶחָד). (KJV, ESV, BSB).</p>
+                </div>
+                <a href="editor.html?book=genesis&amp;chapter=1&amp;verse=5" class="btn-edit">✏️ Editar</a>
+            </div>
+
+            
+
+            <div class="verse-block" id="1.6">
+                <span class="verse-ref">1:6</span>
+                <p class="verse-text">Texto bíblico de Génesis 1:6...</p>
+                <div class="commentary">
+                    
+                <p>Texto aquí.......</p>
+            
+                </div>
+                <a href="editor.html?book=genesis&amp;chapter=1&amp;verse=6" class="btn-edit">✏️ Editar</a>
+            </div>
+
+            <div class="verse-block" id="1.6">
+                <span class="verse-ref">1:6</span>
+                <p class="verse-text">Texto bíblico de Génesis 1:6...</p>
+                <div class="commentary">
+                    
+                <p>Otro comentario...</p>
+            
+                </div>
+                <a href="editor.html?book=genesis&amp;chapter=1&amp;verse=6" class="btn-edit">✏️ Editar</a>
+            </div>
+
+            <div class="verse-block" id="1.6">
+                <span class="verse-ref">1:6</span>
+                <p class="verse-text">Texto bíblico de Génesis 1:6...</p>
+                <div class="commentary">
+                    
+                <p>Nuevo texto de prueba...</p>
+            
+                </div>
+                <a href="editor.html?book=genesis&amp;chapter=1&amp;verse=6" class="btn-edit">✏️ Editar</a>
+            </div><div class="return-top">
+                <a href="#top">↑ Volver Arriba</a>
+            </div>
+        </div>
+        <!-- END CHAPTER CONTENT -->
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+</body></html>
