@@ -639,19 +639,24 @@
         };
 
         // Load books data from index.html
-        async function loadBooksData() {
+        // Load books data from index.html with retry
+        async function loadBooksData(retries = 3, delay = 1000) {
             try {
                 booksData = []; // Clear
-                console.log('Cargando libros...');
+                console.log(`Cargando libros... (Intentos restantes: ${retries})`);
 
                 // Add timestamp to bypass cache
                 const resp = await fetch('index.html?v=' + Date.now());
-                if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+                if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status} ${resp.statusText}`);
 
                 const html = await resp.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 const bookCards = doc.querySelectorAll('.book-card');
+
+                if (bookCards.length === 0) {
+                    throw new Error('No se encontraron elementos .book-card en index.html');
+                }
 
                 bookCards.forEach(card => {
                     const href = card.getAttribute('href');
@@ -672,12 +677,21 @@
                 });
 
                 console.log(`Cargados ${booksData.length} libros.`);
-                if (booksData.length === 0) {
-                    alert('⚠️ No se encontraron libros en index.html. Verifica que el archivo no esté vacío.');
-                }
             } catch (error) {
                 console.error('Error loading books:', error);
-                alert('⚠️ Error al cargar libros: ' + error.message);
+                if (retries > 0) {
+                    console.log(`Reintentando en ${delay}ms...`);
+                    const statusMsg = document.querySelector('.editor-title');
+                    const originalTitle = statusMsg.textContent;
+                    statusMsg.textContent = `⏳ Conectando con el servidor... (${retries})`;
+
+                    setTimeout(() => {
+                        statusMsg.textContent = originalTitle;
+                        loadBooksData(retries - 1, delay * 1.5);
+                    }, delay);
+                } else {
+                    alert(`⚠️ Error al cargar libros desde index.html:\n${error.message}\n\nAsegúrate de que el servidor (pantalla negra) esté ejecutándose.`);
+                }
             }
         }
 
