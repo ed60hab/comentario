@@ -1,9 +1,9 @@
 const CACHE_NAME = "consoft-cache-v1";
 const urlsToCache = [
-  "/",
-  "/index.html",
-  "/img/Saved_512.png",
-  "/manifest.json",
+  "./",
+  "index.html",
+  "img/Saved_512.png",
+  "manifest.json",
   "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
 ];
 
