@@ -360,6 +360,21 @@
             resize: vertical;
         }
 
+        .split-editor-container {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .split-editor-col {
+            flex: 1;
+        }
+
+        .split-editor-col label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+
         .btn-fetch-bible {
             padding: 0.3rem 0.8rem;
             background: var(--accent-color);
@@ -440,12 +455,25 @@
             </div>
 
             <div class="bible-verse-editor">
-                <label>
-                    Texto Bíblico (LBLA)
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <label style="margin: 0; font-size: 1.1rem;">Texto Bíblico</label>
                     <button class="btn-fetch-bible" id="fetchBibleBtn" onclick="fetchBibleText()"
-                        style="display: none;">🔄 Cargar LBLA</button>
-                </label>
-                <textarea id="bibleVerseText" placeholder="Selecciona un versículo para cargar el texto..."></textarea>
+                        style="display: none;">🔄 Cargar Texto</button>
+                </div>
+
+                <div class="split-editor-container">
+                    <div class="split-editor-col">
+                        <label>Texto Original (Hebreo/Griego)</label>
+                        <textarea id="originalText" placeholder="Texto en idioma original..."
+                            style="font-family: 'SBL Hebrew', 'Times New Roman', serif;"></textarea>
+                    </div>
+                    <div class="split-editor-col">
+                        <label>Traducción (LBLA)</label>
+                        <textarea id="translationText" placeholder="Traducción al español..."></textarea>
+                    </div>
+                </div>
+                <!-- Hidden legacy input just in case -->
+                <input type="hidden" id="bibleVerseText">
             </div>
 
             <div id="editor" contenteditable="true">
@@ -835,7 +863,8 @@
                     const verseId = `${selectionState.chapter}.${verse}`;
                     const verseBlock = doc.getElementById(verseId);
 
-                    document.getElementById('bibleVerseText').value = '';
+                    document.getElementById('originalText').value = '';
+                    document.getElementById('translationText').value = '';
                     document.getElementById('editor').innerHTML = '<p>Escribe tu comentario aquí...</p>';
 
                     if (verseBlock) {
@@ -845,7 +874,25 @@
                         if (commentary) {
                             document.getElementById('editor').innerHTML = commentary.innerHTML;
                             if (bibleText) {
-                                document.getElementById('bibleVerseText').value = bibleText.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+                                // Intentar parsear estructura nueva (spans)
+                                const origSpan = bibleText.querySelector('.original-text');
+                                const transSpan = bibleText.querySelector('.translation-text');
+
+                                if (origSpan && transSpan) {
+                                    document.getElementById('originalText').value = origSpan.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+                                    document.getElementById('translationText').value = transSpan.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+                                } else {
+                                    // Fallback estructura antigua (todo junto separado por salto linea)
+                                    const fullText = bibleText.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+                                    const parts = fullText.split('\n');
+                                    if (parts.length > 1) {
+                                        // Asumimos primera linea = original, resto = traduccion
+                                        document.getElementById('originalText').value = parts[0];
+                                        document.getElementById('translationText').value = parts.slice(1).join('\n');
+                                    } else {
+                                        document.getElementById('translationText').value = fullText;
+                                    }
+                                }
                             }
 
                             editMode.isEditing = true;
@@ -1029,47 +1076,55 @@ ${verseLink}
         }
 
         async function fetchBibleText() {
-            const verseText = document.getElementById('bibleVerseText');
+            const originalField = document.getElementById('originalText');
+            const translationField = document.getElementById('translationText');
+
             const book = selectionState.book ? selectionState.book.title : null;
             const chapter = selectionState.chapter;
             const verse = selectionState.verse;
 
             if (!book || !chapter || !verse) return;
 
-            verseText.value = "Cargando texto bíblico...";
+            originalField.value = "Cargando...";
+            translationField.value = "Cargando...";
 
             try {
                 const url = `http://localhost:3000/fetch-bible?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
                 const resp = await fetch(url);
                 const data = await resp.json();
 
-                if (data.text) {
-                    // Si hay hebreo (wlc) y español (lbla), los ponemos en líneas separadas
-                    if (data.wlc && data.lbla) {
-                        verseText.value = `${data.wlc}\n${data.lbla}`;
-                    } else {
-                        verseText.value = data.text;
-                    }
+                if (data.text || data.lbla || data.wlc) {
+                    originalField.value = data.wlc || '';
+                    translationField.value = data.lbla || data.text || ''; // Fallback a text si lbla falta
                 } else {
-                    verseText.value = `(No se pudo cargar el texto automáticamente para ${book} ${chapter}:${verse})`;
+                    translationField.value = `(No se pudo cargar el texto automáticamente para ${book} ${chapter}:${verse})`;
+                    originalField.value = '';
                 }
             } catch (e) {
                 console.error('Error fetching Bible:', e);
-                verseText.value = `(Error de conexión al cargar ${book} ${chapter}:${verse})`;
+                translationField.value = `(Error de conexión al cargar ${book} ${chapter}:${verse})`;
+                originalField.value = '';
             }
         }
 
         async function downloadHTML() {
             const editor = document.getElementById('editor');
             const content = editor.innerHTML;
-            const bibleText = document.getElementById('bibleVerseText').value;
+
+            const origText = document.getElementById('originalText').value;
+            const transText = document.getElementById('translationText').value;
+
             const verseId = `${selectionState.chapter}.${selectionState.verse}`;
             const verseRef = `${selectionState.chapter}:${selectionState.verse}`;
             const bookName = selectionState.book.filename.replace('.html', '');
             const bookFilename = selectionState.book.filename;
 
-            // Convertir saltos de línea a <br> para que se apilen correctamente
-            const bibleTextHTML = bibleText.replace(/\n/g, '<br>');
+            // Construir HTML estructurado para el texto
+            let bibleTextHTML = '';
+            if (origText) {
+                bibleTextHTML += `<span class="original-text">${origText.replace(/\n/g, '<br>')}</span><br>`;
+            }
+            bibleTextHTML += `<span class="translation-text">${transText.replace(/\n/g, '<br>')}</span>`;
 
             // Generate the HTML block for a new verse
             const verseBlockHTML = `
@@ -1081,7 +1136,7 @@ ${verseLink}
                     ${content}
                 </div>
                 <a href="editor.html?book=${bookName}&chapter=${selectionState.chapter}&verse=${selectionState.verse}" class="btn-edit">✏️ Editar</a>
-                <a href="editor.html?action=delete&book=${bookName}&chapter=${selectionState.chapter}&verse=${selectionState.verse}" class="btn-delete">🗑️ Borrar</a>
+                <a href="editor.html?action=delete&book=${bookName}&chapter=${selectionState.chapter}&verse=${selectionState.verse}" class="btn-delete">🗑️ Borrar este Comentario</a>
             </div>`;
 
             // Try automatic update via server first
@@ -1225,7 +1280,15 @@ ${verseLink}
                 // Get the updated content
                 const editor = document.getElementById('editor');
                 const updatedContent = editor.innerHTML;
-                const bibleText = document.getElementById('bibleVerseText').value;
+
+                const origText = document.getElementById('originalText').value;
+                const transText = document.getElementById('translationText').value;
+
+                let bibleTextHTML = '';
+                if (origText) {
+                    bibleTextHTML += `<span class="original-text">${origText.replace(/\n/g, '<br>')}</span><br>`;
+                }
+                bibleTextHTML += `<span class="translation-text">${transText.replace(/\n/g, '<br>')}</span>`;
 
                 // Parse the original book HTML
                 const parser = new DOMParser();
@@ -1241,7 +1304,7 @@ ${verseLink}
                         // Update Bible text
                         const verseTextElem = verseBlock.querySelector('.verse-text');
                         if (verseTextElem) {
-                            verseTextElem.innerHTML = bibleText.replace(/\n/g, '<br>');
+                            verseTextElem.innerHTML = bibleTextHTML;
                         }
 
                         // Replace the commentary content
@@ -1375,8 +1438,26 @@ ${verseLink}
                         // Extract the Bible text
                         const verseTextElem = verseBlock.querySelector('.verse-text');
                         if (verseTextElem) {
-                            const val = verseTextElem.innerHTML.replace(/<br\s*\/?>/gi, '\n').trim();
-                            document.getElementById('bibleVerseText').value = val;
+                            // Extract structured data if available
+                            const origSpan = verseTextElem.querySelector('.original-text');
+                            const transSpan = verseTextElem.querySelector('.translation-text');
+
+                            if (origSpan && transSpan) {
+                                document.getElementById('originalText').value = origSpan.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+                                document.getElementById('translationText').value = transSpan.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+                            } else {
+                                // Legacy fallback
+                                const val = verseTextElem.innerHTML.replace(/<br\s*\/?>/gi, '\n').trim();
+                                const parts = val.split('\n');
+                                if (parts.length > 1) {
+                                    document.getElementById('originalText').value = parts[0];
+                                    document.getElementById('translationText').value = parts.slice(1).join('\n');
+                                } else {
+                                    document.getElementById('translationText').value = val;
+                                    document.getElementById('originalText').value = '';
+                                }
+                            }
+
                             document.getElementById('fetchBibleBtn').style.display = 'inline-block';
 
                             // Store current selection for fetch button
@@ -1385,7 +1466,8 @@ ${verseLink}
                             selectionState.verse = verse;
 
                             // Auto-fetch if it's the generic placeholder
-                            if (val.includes("Texto bíblico de") || val === "") {
+                            const fullVal = verseTextElem.textContent;
+                            if (fullVal.includes("Texto bíblico de") || fullVal.trim() === "") {
                                 fetchBibleText();
                             }
                         }
