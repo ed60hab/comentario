@@ -23,6 +23,7 @@
     <title>Comentarios Bíblicos</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="512x512" href="/img/Saved_512.png">
+    <link rel="manifest" href="/manifest.json">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -349,6 +350,11 @@
                             <a class="nav-link" href="editor.html"
                                 style="background: var(--accent-color); color: white !important; padding: 0.4rem 1rem; border-radius: 6px; margin-left: 0.5rem;">✍️
                                 Comentar</a>
+                        </li>
+                        <li class="nav-item">
+                            <button id="installBtn" class="nav-link" style="display: none; background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color) !important; padding: 0.3rem 0.8rem; border-radius: 6px; margin-left: 0.5rem; transition: all 0.2s;">
+                                📲 Instalar App
+                            </button>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" style="color: var(--accent-color) !important;"
@@ -893,6 +899,39 @@
             // Update buttons
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             btn.classList.add('active');
+        }
+
+        // PWA Install Logic
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('SW registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('SW registration failed:', error);
+                    });
+            });
         }
     </script>
 </body>

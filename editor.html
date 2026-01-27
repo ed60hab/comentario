@@ -118,6 +118,38 @@
             font-weight: 700;
             text-transform: uppercase;
             margin-right: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle-btn {
+            font-size: 0.8rem;
+            transition: transform 0.2s;
+        }
+
+        .toggle-btn.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .keyboard-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 500px;
+            /* Arbitrary large value */
+            opacity: 1;
+            overflow: hidden;
+        }
+
+        .keyboard-container.hidden {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            /* Remove gap effect when hidden */
         }
 
         #editor {
@@ -352,13 +384,17 @@
 
             <div class="toolbar">
                 <div class="toolbar-section" style="flex-direction: column; align-items: flex-start;">
-                    <span class="section-label">Hebreo</span>
-                    <div id="hebrew-keyboard" style="display: flex; flex-direction: column; gap: 5px;"></div>
+                    <span class="section-label" onclick="toggleKeyboard('hebrew')">
+                        Hebreo <span id="hebrew-toggle" class="toggle-btn collapsed">▼</span>
+                    </span>
+                    <div id="hebrew-keyboard" class="keyboard-container hidden"></div>
                 </div>
 
                 <div class="toolbar-section" style="flex-direction: column; align-items: flex-start;">
-                    <span class="section-label">Griego</span>
-                    <div id="greek-keyboard" style="display: flex; flex-direction: column; gap: 5px;"></div>
+                    <span class="section-label" onclick="toggleKeyboard('greek')">
+                        Griego <span id="greek-toggle" class="toggle-btn collapsed">▼</span>
+                    </span>
+                    <div id="greek-keyboard" class="keyboard-container hidden"></div>
                 </div>
                 <div class="toolbar-section">
                     <span class="section-label">Formato</span>
@@ -630,6 +666,19 @@
             const editor = document.getElementById('editor');
             editor.focus();
             document.execCommand('insertText', false, char);
+        }
+
+        function toggleKeyboard(lang) {
+            const container = document.getElementById(`${lang}-keyboard`);
+            const toggle = document.getElementById(`${lang}-toggle`);
+
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                toggle.classList.remove('collapsed');
+            } else {
+                container.classList.add('hidden');
+                toggle.classList.add('collapsed');
+            }
         }
 
         function openModal() {
