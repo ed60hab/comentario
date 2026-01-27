@@ -52,7 +52,7 @@ app.post('/update-file', (req, res) => {
         const commands = [
             `cd "${REPO_PATH}"`,
             `${gitPath} add "${filename}"`,
-            `${gitPath} commit -m "${commitMessage}"`,
+            `(${gitPath} commit -m "${commitMessage}" || echo "⚠️ Nada que commitear")`,
             `${gitPath} push origin main`
         ].join(' && ');
 
@@ -233,7 +233,7 @@ app.get('/debug', (req, res) => {
         `git remote -v`,
         `git status -s`,
         `git log -n 1 --oneline`,
-        `dir /a .git`
+        process.platform === 'win32' ? `dir /a .git` : `ls -la .git`
     ].join(' && ');
 
     exec(commands, (error, stdout, stderr) => {

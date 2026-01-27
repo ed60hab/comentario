@@ -351,13 +351,6 @@
             <h1 class="editor-title">Editor de Comentarios Bíblicos</h1>
 
             <div class="toolbar">
-                <div class="toolbar-section">
-                    <span class="section-label">Formato</span>
-                    <button onclick="formatText('bold')"><strong>Negrita</strong></button>
-                    <button onclick="formatText('italic')"><em>Cursiva</em></button>
-                    <button onclick="insertParagraph()">Nuevo Párrafo</button>
-                </div>
-
                 <div class="toolbar-section" style="flex-direction: column; align-items: flex-start;">
                     <span class="section-label">Hebreo</span>
                     <div id="hebrew-keyboard" style="display: flex; flex-direction: column; gap: 5px;"></div>
@@ -367,6 +360,47 @@
                     <span class="section-label">Griego</span>
                     <div id="greek-keyboard" style="display: flex; flex-direction: column; gap: 5px;"></div>
                 </div>
+                <div class="toolbar-section">
+                    <span class="section-label">Formato</span>
+                    <button onclick="formatText('bold')" title="Negrita"><strong>B</strong></button>
+                    <button onclick="formatText('italic')" title="Cursiva"><em>I</em></button>
+                    <button onclick="formatText('underline')" title="Subrayado"><u>U</u></button>
+                    <button onclick="formatText('removeFormat')" title="Limpiar Formato">🧹</button>
+                    <select onchange="formatText('fontSize', this.value); this.value='';"
+                        style="padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer;">
+                        <option value="">Tamaño</option>
+                        <option value="1">Muy Pequeño</option>
+                        <option value="2">Pequeño</option>
+                        <option value="3">Normal</option>
+                        <option value="4">Mediano</option>
+                        <option value="5">Grande</option>
+                        <option value="6">Muy Grande</option>
+                        <option value="7">Enorme</option>
+                    </select>
+                    <select onchange="formatText('foreColor', this.value); this.value='';" title="Color de texto"
+                        style="padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; margin-left: 0.25rem;">
+                        <option value="">Color</option>
+                        <option value="#000000" style="color: #000000; font-weight: bold;">Negro</option>
+                        <option value="#e53e3e" style="color: #e53e3e; font-weight: bold;">Rojo</option>
+                        <option value="#3182ce" style="color: #3182ce; font-weight: bold;">Azul</option>
+                        <option value="#48bb78" style="color: #48bb78; font-weight: bold;">Verde</option>
+                        <option value="#805ad5" style="color: #805ad5; font-weight: bold;">Púrpura</option>
+                        <option value="#ed8936" style="color: #ed8936; font-weight: bold;">Naranja</option>
+                    </select>
+                </div>
+
+                <div class="toolbar-section">
+                    <span class="section-label">Párrafo</span>
+                    <button onclick="formatText('justifyLeft')" title="Alinear Izquierda">Left</button>
+                    <button onclick="formatText('justifyCenter')" title="Centrar">Center</button>
+                    <button onclick="formatText('justifyRight')" title="Alinear Derecha">Right</button>
+                    <button onclick="formatText('justifyFull')" title="Justificar">Justify</button>
+                    <button onclick="formatText('insertUnorderedList')" title="Lista con viñetas">• List</button>
+                    <button onclick="formatText('insertOrderedList')" title="Lista numerada">1. List</button>
+                    <button onclick="insertParagraph()" title="Nuevo Párrafo">¶</button>
+                </div>
+
+
             </div>
 
             <div class="bible-verse-editor">
@@ -384,8 +418,12 @@
 
             <button class="btn-save" style="background: #2d3748;" onclick="openModal()">🔍 Seleccionar Libro /
                 Versículo</button>
-            <button class="btn-save" id="publishBtn" onclick="saveCommentary()" style="display: none;">🚀 Publicar en
-                GitHub</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-save" id="saveKeepBtn" onclick="saveCommentary(false)"
+                    style="display: none; background: #3182ce;">💾 Guardar</button>
+                <button class="btn-save" id="publishBtn" onclick="saveCommentary(true)"
+                    style="display: none; background: #2c5282;">🚀 Guardar y Salir</button>
+            </div>
             <button class="btn-delete" id="deleteVerseBtn" onclick="deleteCurrentVerse()"
                 style="display: none; width: 100%; margin-left: 0; padding: 1rem;">🗑️ Borrar este Versículo</button>
             <a href="index.html" class="btn-save"
@@ -579,8 +617,9 @@
             }
         }
 
-        function formatText(command) {
-            document.execCommand(command, false, null);
+        function formatText(command, value = null) {
+            document.execCommand(command, false, value);
+            document.getElementById('editor').focus();
         }
 
         function insertParagraph() {
@@ -791,9 +830,9 @@
             closeModal();
         }
 
-        function saveCommentary() {
+        function saveCommentary(exit = true) {
             if (editMode.isEditing) {
-                updateBookFile();
+                updateBookFile(exit);
             } else {
                 downloadHTML();
             }
@@ -1079,7 +1118,7 @@ ${verseLink}
             }
         }
 
-        async function updateBookFile() {
+        async function updateBookFile(exit = true) {
             try {
                 // Get the updated content
                 const editor = document.getElementById('editor');
@@ -1137,14 +1176,19 @@ ${verseLink}
 
                     const result = await response.json();
                     if (result.success) {
-                        alert('✅ ¡Actualizado y Pujado a GitHub exitosamente!\nTu sitio se actualizará en unos instantes.');
-                        if (editMode.isEditing) {
+                        alert('✅ ¡Actualizado a GitHub exitosamente!\nTu sitio se actualizará en unos instantes.');
+                        if (editMode.isEditing && exit) {
                             window.location.href = 'index.html';
                         }
                         return closeModal();
+                    } else {
+                        // Show the specific error from the server
+                        throw new Error(result.error || 'Error desconocido del servidor');
                     }
                 } catch (e) {
-                    console.log('Servidor no disponible, usando descarga manual');
+                    console.error('Error del servidor:', e);
+                    alert('❌ Error del servidor: ' + e.message + '\n\nSe intentará la descarga manual como respaldo.');
+                    // Don't just log, actually show the error to the user before falling back
                 }
 
                 // Fallback: Download the complete updated book file
@@ -1238,10 +1282,13 @@ ${verseLink}
 
                             // Update the save button text
                             const saveBtn = document.getElementById('publishBtn');
+                            const saveKeepBtn = document.getElementById('saveKeepBtn');
                             if (saveBtn) {
                                 saveBtn.style.display = 'block';
-                                saveBtn.textContent = '🚀 Publicar en GitHub (Actualizar)';
-                                saveBtn.onclick = saveCommentary;
+                                saveBtn.textContent = '🚀 Guardar y Salir';
+                            }
+                            if (saveKeepBtn) {
+                                saveKeepBtn.style.display = 'block';
                             }
                             // Show delete button
                             document.getElementById('deleteVerseBtn').style.display = 'block';
