@@ -43,12 +43,22 @@ app.post('/update-file', (req, res) => {
         let gitPath = "git";
 
         if (isWindows) {
-            // Check if specific path exists, otherwise default to 'git'
-            const specificPath = "C:\\Program Files\\Git\\bin\\git.exe";
-            if (fs.existsSync(specificPath)) {
-                gitPath = `"${specificPath}"`;
+            const possiblePaths = [
+                "C:\\Program Files\\Git\\cmd\\git.exe",
+                "C:\\Program Files\\Git\\bin\\git.exe",
+                process.env.LOCALAPPDATA + "\\GitHubDesktop\\app-3.5.4\\resources\\app\\git\\cmd\\git.exe", // Version specific, fallback
+            ];
+
+            for (const p of possiblePaths) {
+                if (fs.existsSync(p)) {
+                    gitPath = `"${p}"`;
+                    break;
+                }
             }
         }
+
+        console.log(`ℹ️  Usando Git en: ${gitPath}`);
+
         const commands = [
             `cd "${REPO_PATH}"`,
             `${gitPath} add "${filename}"`,

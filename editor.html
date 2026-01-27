@@ -461,7 +461,7 @@
                     style="display: none; background: #2c5282;">🚀 Guardar y Salir</button>
             </div>
             <button class="btn-delete" id="deleteVerseBtn" onclick="deleteCurrentVerse()"
-                style="display: none; width: 100%; margin-left: 0; padding: 1rem;">🗑️ Borrar este Versículo</button>
+                style="display: none; width: 100%; margin-left: 0; padding: 1rem;">🗑️ Borrar este Comentario</button>
             <a href="index.html" class="btn-save"
                 style="background: #718096; text-decoration: none; text-align: center; display: block;">Volver al
                 Índice</a>
@@ -998,6 +998,36 @@ ${verseLink}
             document.getElementById('stepIndicator').textContent = `${selectionState.book.title} ${verseRef}`;
         }
 
+        function switchToEditMode(bookFilename, chapter, verse, originalHTML) {
+            editMode.isEditing = true;
+            editMode.bookName = bookFilename.replace('.html', '');
+            editMode.chapter = chapter;
+            editMode.verse = verse;
+            editMode.originalHTML = originalHTML;
+
+            // Update UI
+            document.querySelector('.editor-title').textContent = `Editando: ${selectionState.book.title} ${chapter}:${verse}`;
+            document.getElementById('modalTitle').textContent = 'Comentario Guardado';
+
+            // Show buttons
+            document.getElementById('fetchBibleBtn').style.display = 'inline-block';
+            const saveBtn = document.getElementById('publishBtn');
+            const saveKeepBtn = document.getElementById('saveKeepBtn');
+            const deleteBtn = document.getElementById('deleteVerseBtn');
+
+            saveBtn.style.display = 'block';
+            saveBtn.textContent = '🚀 Guardar y Salir';
+
+            if (!saveKeepBtn.style.display || saveKeepBtn.style.display === 'none') {
+                saveKeepBtn.style.display = 'block';
+                // Restore original color/text if it was changed by feedback
+                saveKeepBtn.style.background = '#3182ce';
+                saveKeepBtn.textContent = '💾 Guardar';
+            }
+
+            deleteBtn.style.display = 'block';
+        }
+
         async function fetchBibleText() {
             const verseText = document.getElementById('bibleVerseText');
             const book = selectionState.book ? selectionState.book.title : null;
@@ -1142,8 +1172,31 @@ ${verseLink}
 
                 const result = await response.json();
                 if (result.success) {
-                    alert('✅ ¡Publicado automáticamente!\nEl comentario se insertó en ' + bookFilename + ' y se subió a GitHub.');
-                    return closeModal();
+                    // Si es guardar y salir (automático normal), cerramos
+                    // PERO aquí estamos en creación. Si queremos persistir:
+
+                    // Actualizamos el editMode con el nuevo contendio para seguir editando
+                    // Necesitamos recargar el "originalHTML" con lo que acabamos de guardar
+                    // O más simple: Hacemos un fetch silencioso del libro actualizado
+
+                    const newBookResp = await fetch(bookFilename);
+                    const newBookHTML = await newBookResp.text();
+
+                    switchToEditMode(bookFilename, selectionState.chapter, selectionState.verse, newBookHTML);
+
+                    // Feedback visual sutil
+                    const saveKeepBtn = document.getElementById('saveKeepBtn');
+                    const originalText = saveKeepBtn.textContent;
+                    saveKeepBtn.textContent = '✅ ¡Guardado!';
+                    saveKeepBtn.style.background = '#48bb78';
+
+                    setTimeout(() => {
+                        saveKeepBtn.textContent = originalText;
+                        saveKeepBtn.style.background = '#3182ce';
+                    }, 2000);
+
+                    closeModal(); // Cerramos el modal de selección/generación código
+                    return;
                 } else {
                     throw new Error(result.error || 'Error desconocido en el servidor');
                 }
@@ -1225,11 +1278,29 @@ ${verseLink}
 
                     const result = await response.json();
                     if (result.success) {
-                        alert('✅ ¡Actualizado a GitHub exitosamente!\nTu sitio se actualizará en unos instantes.');
                         if (editMode.isEditing && exit) {
+                            alert('✅ ¡Guardado y Saliedo!');
                             window.location.href = 'index.html';
+                        } else {
+                            // Feedback sutil para "Guardar (sin salir)"
+                            const saveKeepBtn = document.getElementById('saveKeepBtn');
+                            saveKeepBtn.textContent = '✅ ¡Guardado!';
+                            saveKeepBtn.style.background = '#48bb78';
+
+                            // Recargar el HTML original en memoria por si hace más cambios
+                            // Esto es crucial para no perder la sincronía
+                            const bookFilename = editMode.bookName + '.html';
+                            const resp = await fetch(bookFilename);
+                            if (resp.ok) {
+                                editMode.originalHTML = await resp.text();
+                            }
+
+                            setTimeout(() => {
+                                saveKeepBtn.textContent = '💾 Guardar';
+                                saveKeepBtn.style.background = '#3182ce';
+                            }, 2000);
                         }
-                        return closeModal();
+                        return closeModal(); // En caso de que el modal estuviera abierto (raro en edicion)
                     } else {
                         // Show the specific error from the server
                         throw new Error(result.error || 'Error desconocido del servidor');
