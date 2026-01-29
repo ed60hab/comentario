@@ -7,12 +7,12 @@
   "theme_color": "#1b263b",
   "icons": [
     {
-      "src": "img/Saved_512.png",
+      "src": "img/torah_scroll.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "img/Saved_512.png",
+      "src": "img/torah_scroll.png",
       "sizes": "512x512",
       "type": "image/png"
     }
