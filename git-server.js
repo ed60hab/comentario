@@ -63,7 +63,7 @@ app.post('/update-file', (req, res) => {
             `cd "${REPO_PATH}"`,
             `${gitPath} pull origin main`, // Sincronizar antes de guardar para evitar conflictos
             `${gitPath} add "${filename}"`,
-            `(${gitPath} commit -m "${commitMessage}" || echo "⚠️ Nada que commitear")`,
+            `(${gitPath} commit -m "${commitMessage}" || echo "⚠️ Nada que registrar")`,
             `${gitPath} push origin main`
         ].join(' && ');
 
