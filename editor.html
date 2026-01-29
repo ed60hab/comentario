@@ -595,7 +595,7 @@
                     const serializer = new XMLSerializer();
                     const updatedHTML = serializer.serializeToString(doc);
 
-                    const publishResp = await fetch('http://localhost:3000/update-file', {
+                    const publishResp = await fetch('/update-file', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -789,7 +789,7 @@
                 container.innerHTML = `
                     <div style="padding: 2rem; text-align: center;">
                         <p>❌ No se encontraron libros para este testamento.</p>
-                        <p style="font-size: 0.9rem; color: #666;">Intenta recargar el editor (F5) o usa la URL: http://localhost:3000/editor.html</p>
+                        <p style="font-size: 0.9rem; color: #666;">Intenta recargar el editor (F5) o usa la URL: /editor.html</p>
                         <button class="btn-save" onclick="loadBooksData(); showTestamentSelection();">🔄 Reintentar Cargar</button>
                     </div>
                 `;
@@ -970,7 +970,7 @@
                         const serializer = new XMLSerializer();
                         const updatedHTML = serializer.serializeToString(doc);
 
-                        const response = await fetch('http://localhost:3000/update-file', {
+                        const response = await fetch('/update-file', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -1103,7 +1103,7 @@ ${verseLink}
             translationField.value = "Cargando...";
 
             try {
-                const url = `http://localhost:3000/fetch-bible?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
+                const url = `/fetch-bible?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
                 const resp = await fetch(url);
                 const data = await resp.json();
 
@@ -1229,7 +1229,7 @@ ${verseLink}
                 const serializer = new XMLSerializer();
                 const updatedHTML = serializer.serializeToString(doc);
 
-                const response = await fetch('http://localhost:3000/update-file', {
+                const response = await fetch('/update-file', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1271,7 +1271,7 @@ ${verseLink}
                 }
             } catch (e) {
                 console.error('Error en automatización:', e);
-                const errorMsg = `❌ No se pudo publicar automáticamente.\n\nCausa: ${e.message}\n\nRECUERDA:\n1. El archivo "start-server.bat" debe estar ABIERTO.\n2. Debes usar la dirección http://localhost:3000/editor.html\n\n¿Quieres descargar el fragmento para pegarlo manualmente?`;
+                const errorMsg = `❌ No se pudo publicar automáticamente.\n\nCausa: ${e.message}\n\nRECUERDA:\n1. El archivo "start-server.bat" debe estar ABIERTO.\n2. Debes usar la dirección /editor.html\n\n¿Quieres descargar el fragmento para pegarlo manualmente?`;
 
                 if (confirm(errorMsg)) {
                     // Fallback: Original behavior for new commentaries (manual download)
@@ -1343,7 +1343,7 @@ ${verseLink}
 
                 // Try automatic update via server first
                 try {
-                    const response = await fetch('http://localhost:3000/update-file', {
+                    const response = await fetch('/update-file', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

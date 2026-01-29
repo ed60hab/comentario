@@ -258,6 +258,54 @@ app.get('/debug', (req, res) => {
     });
 });
 
+// Endpoint para listar los libros (NECESARIO para editor.html)
+app.get('/list-books', (req, res) => {
+    // Escaner el directorio para encontrar archivos HTML de la Biblia
+    fs.readdir(REPO_PATH, (err, files) => {
+        if (err) {
+            console.error('❌ Error leyendo directorio:', err);
+            return res.status(500).json({ error: 'Error al leer directorio' });
+        }
+
+        // Libros ordenados canónicamente (simplificado para coincidir con la lista dura por defecto si falla algo)
+        // Por ahora devolvemos todos los .html que parezcan libros
+        const books = [];
+        const bibleOrder = [
+            'genesis', 'exodo', 'levitico', 'numeros', 'deuteronomio', 'josue', 'jueces', 'rut', '1samuel', '2samuel', '1reyes', '2reyes', '1cronicas', '2cronicas', 'esdras', 'nehemias', 'ester', 'job', 'salmos', 'proverbios', 'eclesiastes', 'cantares', 'isaias', 'jeremias', 'lamentaciones', 'ezequiel', 'daniel', 'oseas', 'joel', 'amos', 'abdias', 'jonas', 'miqueas', 'nahum', 'habacuc', 'sofonias', 'hageo', 'zacarias', 'malaquias',
+            'mateo', 'marcos', 'lucas', 'juan', 'hechos', 'romanos', '1corintios', '2corintios', 'galatas', 'efesios', 'filipenses', 'colosenses', '1tesalonicenses', '2tesalonicenses', '1timoteo', '2timoteo', 'tito', 'filemon', 'hebreos', 'santiago', '1pedro', '2pedro', '1juan', '2juan', '3juan', 'judas', 'apocalipsis'
+        ];
+
+        // Mapeo simple de nombres bonitos (podríamos mejorarlo)
+        const formatTitle = (filename) => {
+            const name = filename.replace('.html', '');
+            return name.charAt(0).toUpperCase() + name.slice(1).replace('-', ' ');
+        };
+
+        files.forEach(file => {
+            if (file.endsWith('.html') && !file.startsWith('index') && !file.startsWith('editor') && !file.startsWith('404')) {
+                // Es un libro candidato
+                books.push({
+                    filename: file,
+                    title: formatTitle(file), // Título provisional
+                    chapters: 150 // Fallback genérico, idealmente leeríamos el archivo para contar capítulos
+                });
+            }
+        });
+
+        // Ordenar según orden bíblico si es posible
+        books.sort((a, b) => {
+            const nameA = a.filename.replace('.html', '').replace(/\d+/g, '').trim(); // quitar numeros para comparar base
+            const nameB = b.filename.replace('.html', '').replace(/\d+/g, '').trim();
+            // Esto es un sort muy básico. Mejor confiar en que el usuario tiene los archivos.
+            // Para ser robustos, devolvemos la lista de archivos encontrados.
+            return a.filename.localeCompare(b.filename);
+        });
+
+        // Para evitar problemas en el frontend, enviamos una lista de "todos conocidos" si existen
+        res.json(books);
+    });
+});
+
 // Endpoint de verificación
 app.get('/status', (req, res) => {
     res.json({
@@ -287,4 +335,18 @@ server = app.listen(PORT, '0.0.0.0', () => {
 
 server.on('error', (e) => {
     console.error('ERROR EN EL SERVIDOR:', e);
+});
+
+// Manejo elegante del cierre (Ctrl+C)
+process.on('SIGINT', () => {
+    console.log('\n🛑 Cerrando servidor...');
+    server.close(() => {
+        console.log('✅ Servidor cerrado correctamente.');
+        process.exit(0);
+    });
+    // Forzar cierre si falla
+    setTimeout(() => {
+        console.log('⚠️ Forzando cierre...');
+        process.exit(1);
+    }, 1000);
 });
