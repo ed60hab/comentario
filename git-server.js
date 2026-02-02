@@ -71,10 +71,13 @@ app.post('/update-file', (req, res) => {
 
         exec(commands, (error, stdout, stderr) => {
             if (error) {
-                console.error('❌ Error:', stderr);
-                return res.status(500).json({
-                    success: false,
-                    error: stderr || error.message
+                console.error('❌ Error en Git:', stderr);
+                // Return 200 OK because file WAS saved, but with gitError
+                return res.json({
+                    success: true,
+                    message: 'Archivo guardado localmente, pero falló la sincronización con GitHub',
+                    gitError: stderr || error.message,
+                    output: stdout
                 });
             }
 
