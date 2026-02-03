@@ -1258,7 +1258,7 @@
                 editMode.currentSHA = result.content.sha; // Update SHA for next save
                 editMode.originalHTML = updatedHTML; // Update in-memory HTML
 
-                if (editMode.isEditing && exit) {
+                if (exit) {
                     alert('✅ ¡Guardado en la Nube y Saliendo!');
                     window.location.href = 'index.html';
                 } else {
@@ -1353,125 +1353,68 @@
             const isNT = ntBooks.includes(fileName.replace('.html', ''));
 
             try {
-                let url;
-                if (isNT) {
-                    const bibleBook = book.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                    url = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(bibleBook)}+${chapter}:${verse}&version=SBLGNT;LBLA`;
-                } else {
-                    url = `https://wlc.consoft.site/${fileName}`;
-                }
+                // UNIFIED LOGIC: Use BibleGateway for BOTH NT and OT
+                // This fetches ONLY the verse needed, not the whole book.
+                const bibleBook = book.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const versionOrig = isNT ? "SBLGNT" : "WLC";
+                const url = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(bibleBook)}+${chapter}:${verse}&version=${versionOrig};LBLA`;
 
-                // Función interna para realizar el fetch con reintentos
-                const fetchWithRetry = async (url, retries = 2) => {
-                    for (let i = 0; i <= retries; i++) {
-                        try {
-                            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&td=${Date.now()}`;
-                            const response = await fetch(proxyUrl);
-                            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                            return await response.json();
-                        } catch (err) {
-                            if (i === retries) throw err;
-                            console.log(`Reintentando fetch (${i + 1}/${retries})...`);
-                            await new Promise(r => setTimeout(r, 1000));
-                        }
-                    }
-                };
+                originalField.innerHTML = "⏳ Conectando...";
+                translationField.innerHTML = "⏳ Esto tardará un par de segundos...";
 
-                originalField.innerHTML = "⏳ Conectando con la fuente...";
-                translationField.innerHTML = "⏳ Esto puede tardar unos segundos...";
-
-                const result = await fetchWithRetry(url);
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&td=${Date.now()}`;
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const result = await response.json();
                 const data = result.contents;
 
-                if (isNT) {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(data, 'text/html');
-                    const passages = doc.querySelectorAll('.passage-content');
-                    let versions = [];
-                    passages.forEach(p => {
-                        let rawHtml = p.innerHTML;
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data, 'text/html');
+                const passages = doc.querySelectorAll('.passage-content');
+                let versions = [];
 
-                        // 1. Limpieza agressiva de comentarios y basura
-                        rawHtml = rawHtml.replace(/<!--[\s\S]*?-->/g, '');
-                        rawHtml = rawHtml.replace(/Read full chapter/gi, '');
+                passages.forEach(p => {
+                    let rawHtml = p.innerHTML;
 
-                        // 2. Separar cuerpo y metadatos
-                        const metaIndex = rawHtml.search(/(Footnotes|Cross references|Referencias Cruzadas|Notas al pie)/i);
-                        let bodyHtml = rawHtml;
-                        let metaHtml = '';
+                    // 1. Limpieza agressiva de comentarios y basura
+                    rawHtml = rawHtml.replace(/<!--[\s\S]*?-->/g, '');
+                    rawHtml = rawHtml.replace(/Read full chapter/gi, '');
 
-                        if (metaIndex !== -1) {
-                            bodyHtml = rawHtml.substring(0, metaIndex);
-                            metaHtml = rawHtml.substring(metaIndex);
-                        }
+                    // 2. Separar cuerpo y metadatos
+                    const metaIndex = rawHtml.search(/(Footnotes|Cross references|Referencias Cruzadas|Notas al pie)/i);
+                    let bodyHtml = rawHtml;
+                    let metaHtml = '';
 
-                        const cleanInBrowser = (h, isMeta = false) => {
-                            const temp = document.createElement('div');
-                            temp.innerHTML = h;
-                            // Quitar sups
-                            temp.querySelectorAll('sup').forEach(s => s.remove());
+                    if (metaIndex !== -1) {
+                        bodyHtml = rawHtml.substring(0, metaIndex);
+                        metaHtml = rawHtml.substring(metaIndex);
+                    }
 
-                            let text = temp.innerHTML
-                                .replace(/<[^>]*>/g, (tag) => {
-                                    if (tag.startsWith('<br')) return '<br>';
-                                    return ' ';
-                                })
-                                .replace(/&nbsp;/g, ' ')
-                                .replace(/\s+/g, ' ')
-                                .replace(/<br>\s+/g, '<br>')
-                                .trim();
-
-                            return isMeta ? `<span class="bible-meta">${text}</span>` : text;
-                        };
-
-                        let finalVerse = cleanInBrowser(bodyHtml);
-                        if (metaHtml) {
-                            finalVerse += '<br>' + cleanInBrowser(metaHtml, true);
-                        }
-
-                        if (finalVerse) versions.push(finalVerse);
-                    });
-                    const gnt = versions[0] || "";
-                    const lbla = versions[1] || "";
-                    originalField.innerHTML = gnt;
-                    translationField.innerHTML = lbla;
-                } else {
-                    // Lógica OT (wlc.consoft.site)
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(data, 'text/html');
-                    const chapterDiv = doc.getElementById(chapter.toString());
-                    if (!chapterDiv) throw new Error(`Capítulo ${chapter} no encontrado`);
-
-                    const getVerseText = (columnClass) => {
-                        const col = chapterDiv.querySelector(`.column.${columnClass}`);
-                        if (!col) return null;
-                        const verseDiv = Array.from(col.querySelectorAll('.verse')).find(v => {
-                            const vNum = v.querySelector('.verse-number');
-                            return vNum && vNum.textContent.trim() === verse.toString();
-                        });
-                        if (!verseDiv) return null;
-                        const textElem = verseDiv.querySelector('.verse-text');
-                        return textElem ? textElem.innerHTML
-                            .replace(/<link[^>]*>|<style[^>]*>|<script[^>]*>|<!--[\s\S]*?-->/gi, '')
-                            .replace(/<\/?[a-z][^>]*>/gi, ' ')
+                    const cleanInBrowser = (h, isMeta = false) => {
+                        const temp = document.createElement('div');
+                        temp.innerHTML = h;
+                        temp.querySelectorAll('sup').forEach(s => s.remove());
+                        let text = temp.innerHTML
+                            .replace(/<[^>]*>/g, (tag) => tag.startsWith('<br') ? '<br>' : ' ')
+                            .replace(/&nbsp;/g, ' ')
                             .replace(/\s+/g, ' ')
-                            .trim() : null;
+                            .replace(/<br>\s+/g, '<br>')
+                            .trim();
+                        return isMeta ? `<span class="bible-meta">${text}</span>` : text;
                     };
 
-                    const lblaText = getVerseText('lbla');
-                    const wlcText = getVerseText('wlc');
+                    versions.push(cleanInBrowser(bodyHtml));
+                    if (metaHtml) versions.push(cleanInBrowser(metaHtml, true));
+                });
 
-                    originalField.innerHTML = wlcText || "";
-                    translationField.innerHTML = lblaText || "(Texto no encontrado)";
-                }
+                const gntOrWlc = versions[0] || "";
+                const lbla = versions[1] || "";
+                originalField.innerHTML = gntOrWlc;
+                translationField.innerHTML = lbla;
+
             } catch (e) {
-                console.error('Error fetching Bible in Cloud Mode:', e);
-                translationField.innerHTML = `
-                    <div style="color: #c53030; background: #fff5f5; padding: 1rem; border-radius: 8px; border: 1px solid #feb2b2;">
-                        <p><strong>❌ Error al cargar texto bíblico</strong></p>
-                        <p>${e.message}</p>
-                        <p>Intenta copiar y pegar el texto manualmente.</p>
-                    </div>`;
+                console.error(e);
+                translationField.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
                 originalField.innerHTML = "";
             }
         }
