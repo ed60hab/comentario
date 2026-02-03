@@ -1416,33 +1416,47 @@
                 originalField.innerHTML = "⏳ Conectando...";
                 translationField.innerHTML = "⏳ Intentando cargar...";
 
-                // MULTI-PROXY FETCH WITH RETRY
+                // HIGH PERFORMANCE PROXY RACING
                 async function fetchWithFallback(url) {
-                    const proxies = [
-                        (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}&td=${Date.now()}`,
-                        (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`
+                    const abortController = new AbortController();
+
+                    const fetchWithProxy = async (proxyFn, name) => {
+                        const proxyUrl = proxyFn(url);
+                        try {
+                            const response = await fetch(proxyUrl, { signal: abortController.signal });
+                            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                            let data;
+                            if (proxyUrl.includes('allorigins.win')) {
+                                const result = await response.json();
+                                data = result.contents;
+                            } else {
+                                data = await response.text();
+                            }
+
+                            if (!data || data.length < 100) throw new Error("Respuesta incompleta");
+
+                            console.log(`🚀 Carrera ganada por: ${name}`);
+                            abortController.abort(); // Cancel other requests
+                            return data;
+                        } catch (err) {
+                            if (err.name === 'AbortError') throw err;
+                            console.warn(`Pincho fallido (${name}):`, err.message);
+                            throw err;
+                        }
+                    };
+
+                    const racers = [
+                        fetchWithProxy((u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}&td=${Date.now()}`, "AllOrigins"),
+                        fetchWithProxy((u) => `https://corsproxy.io/?${encodeURIComponent(u)}`, "CorsProxy.io"),
+                        fetchWithProxy((u) => `https://api.codetabs.com/v1/proxy?url=${encodeURIComponent(u)}`, "CodeTabs")
                     ];
 
-                    for (const getProxyUrl of proxies) {
-                        const proxyUrl = getProxyUrl(url);
-                        for (let i = 0; i < 2; i++) { // 2 attempts per proxy
-                            try {
-                                const response = await fetch(proxyUrl);
-                                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-                                if (proxyUrl.includes('allorigins.win/get')) {
-                                    const result = await response.json();
-                                    return result.contents;
-                                } else {
-                                    // direct proxies return the body directly (text)
-                                    return await response.text();
-                                }
-                            } catch (err) {
-                                console.warn(`Intento fallido con proxy (${proxyUrl}):`, err.message);
-                                if (getProxyUrl === proxies[proxies.length - 1] && i === 1) throw err;
-                                await new Promise(r => setTimeout(r, 1000));
-                            }
-                        }
+                    try {
+                        return await Promise.any(racers);
+                    } catch (err) {
+                        console.error("Todos los proxies fallaron", err);
+                        throw new Error("No se pudo conectar con ningún servidor de descarga.");
                     }
                 }
 
