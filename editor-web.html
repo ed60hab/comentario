@@ -1283,12 +1283,12 @@
         async function fetchBibleText() {
             const originalField = document.getElementById('originalText');
             const translationField = document.getElementById('translationText');
+
+            if (!selectionState.book) return;
+
             const book = selectionState.book.title;
             const chapter = selectionState.chapter;
             const verse = selectionState.verse;
-
-            originalField.innerHTML = "Cargando...";
-            translationField.innerHTML = "Cargando...";
 
             const bookMapping = {
                 'génesis': 'genesis.html', 'genesis': 'genesis.html',
@@ -1343,30 +1343,46 @@
             };
 
             const fileName = bookMapping[book.toLowerCase()];
-            if (!fileName) {
-                translationField.innerHTML = `(Libro ${book} no soportado todavía)`;
-                originalField.innerHTML = "";
-                return;
-            }
+            if (!fileName) return;
 
             const ntBooks = ['mateo', 'marcos', 'lucas', 'juan', 'hechos', 'romanos', '1corintios', '2corintios', 'galatas', 'efesios', 'filipenses', 'colosenses', '1tesalonicenses', '2tesalonicenses', '1timoteo', '2timoteo', 'tito', 'filemon', 'hebreos', 'santiago', '1pedro', '2pedro', '1juan', '2juan', '3juan', 'judas', 'apocalipsis'];
             const isNT = ntBooks.includes(fileName.replace('.html', ''));
 
             try {
-                // UNIFIED LOGIC: Use BibleGateway for BOTH NT and OT
-                // This fetches ONLY the verse needed, not the whole book.
-                const bibleBook = book.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                // BOOK NAME FOR SEARCH: Use filename to avoid issues with accents
+                const searchBook = fileName.replace('.html', '');
                 const versionOrig = isNT ? "SBLGNT" : "WLC";
-                const url = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(bibleBook)}+${chapter}:${verse}&version=${versionOrig};LBLA`;
+                const bibleUrl = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(searchBook)}+${chapter}:${verse}&version=${versionOrig};LBLA`;
 
                 originalField.innerHTML = "⏳ Conectando...";
-                translationField.innerHTML = "⏳ Esto tardará un par de segundos...";
+                translationField.innerHTML = "⏳ Intentando cargar...";
 
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&td=${Date.now()}`;
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const result = await response.json();
-                const data = result.contents;
+                // MULTI-PROXY FETCH WITH RETRY
+                async function fetchWithFallback(url) {
+                    const proxies = [
+                        (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}&td=${Date.now()}`,
+                        (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`
+                    ];
+
+                    for (const getProxyUrl of proxies) {
+                        for (let i = 0; i < 2; i++) { // 2 attempts per proxy
+                            try {
+                                const response = await fetch(getProxyUrl(url));
+                                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                                const result = await response.json();
+                                // AllOrigins returns .contents, corsproxy.io returns the body directly (but we need to handle both)
+                                return result.contents || result;
+                            } catch (err) {
+                                console.warn(`Intento fallido con proxy:`, err.message);
+                                if (getProxyUrl === proxies[proxies.length - 1] && i === 1) throw err;
+                                await new Promise(r => setTimeout(r, 800));
+                            }
+                        }
+                    }
+                }
+
+                const data = await fetchWithFallback(bibleUrl);
+                if (!data) throw new Error("No se recibió respuesta del servidor");
 
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data, 'text/html');
@@ -1375,16 +1391,10 @@
 
                 passages.forEach(p => {
                     let rawHtml = p.innerHTML;
-
-                    // 1. Limpieza agressiva de comentarios y basura
-                    rawHtml = rawHtml.replace(/<!--[\s\S]*?-->/g, '');
-                    rawHtml = rawHtml.replace(/Read full chapter/gi, '');
-
-                    // 2. Separar cuerpo y metadatos
+                    rawHtml = rawHtml.replace(/<!--[\s\S]*?-->/g, '').replace(/Read full chapter/gi, '');
                     const metaIndex = rawHtml.search(/(Footnotes|Cross references|Referencias Cruzadas|Notas al pie)/i);
                     let bodyHtml = rawHtml;
                     let metaHtml = '';
-
                     if (metaIndex !== -1) {
                         bodyHtml = rawHtml.substring(0, metaIndex);
                         metaHtml = rawHtml.substring(metaIndex);
@@ -1407,14 +1417,12 @@
                     if (metaHtml) versions.push(cleanInBrowser(metaHtml, true));
                 });
 
-                const gntOrWlc = versions[0] || "";
-                const lbla = versions[1] || "";
-                originalField.innerHTML = gntOrWlc;
-                translationField.innerHTML = lbla;
+                originalField.innerHTML = versions[0] || "(Texto original no encontrado)";
+                translationField.innerHTML = versions[1] || "(Traducción no encontrada)";
 
             } catch (e) {
-                console.error(e);
-                translationField.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
+                console.error('Fetch Error:', e);
+                translationField.innerHTML = `<span style="color:red">❌ Error de conexión: ${e.message}.<br>Por favor, intenta de nuevo o revisa tu conexión a internet.</span>`;
                 originalField.innerHTML = "";
             }
         }
