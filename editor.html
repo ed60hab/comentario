@@ -1413,10 +1413,18 @@ ${verseLink}
                         // Replace the commentary content
                         commentary.innerHTML = updatedContent;
 
-                        // Ensure Borrar button is present
+                        // Ensure Edit and Borrar buttons are present
+                        const bookName = editMode.bookName;
+                        if (!verseBlock.querySelector('.btn-edit')) {
+                            const btnEdit = doc.createElement('a');
+                            btnEdit.href = `editor.html?book=${bookName}&chapter=${editMode.chapter}&verse=${editMode.verse}`;
+                            btnEdit.className = 'btn-edit';
+                            btnEdit.textContent = '✏️ Editar';
+                            verseBlock.appendChild(doc.createTextNode('\n                '));
+                            verseBlock.appendChild(btnEdit);
+                        }
                         if (!verseBlock.querySelector('.btn-delete')) {
                             const btnDelete = doc.createElement('a');
-                            const bookName = editMode.bookName;
                             btnDelete.href = `editor.html?action=delete&book=${bookName}&chapter=${editMode.chapter}&verse=${editMode.verse}`;
                             btnDelete.className = 'btn-delete';
                             btnDelete.textContent = '🗑️ Borrar';
@@ -1424,6 +1432,50 @@ ${verseLink}
                             verseBlock.appendChild(btnDelete);
                         }
                     }
+                }
+
+                // CSS AUTO-REPAIR: Ensure styles for buttons exist
+                let styleTag = doc.querySelector('style');
+                if (styleTag && !styleTag.textContent.includes('.btn-edit')) {
+                    console.log("Añadiendo estilos faltantes al libro...");
+                    const extraStyles = `
+        .btn-edit {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-right: 0.5rem;
+        }
+        .btn-edit:hover { background: var(--accent-hover); color: white; transform: translateY(-1px); }
+        .btn-delete {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: #e53e3e;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover { background: #c53030; color: white; transform: translateY(-1px); }
+        .bible-meta {
+            font-size: 0.85rem;
+            font-style: italic;
+            color: #718096;
+            display: block;
+            margin-top: 0.5rem;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 0.3rem;
+        } `;
+                    styleTag.textContent += extraStyles;
                 }
 
                 // Serialize the updated document

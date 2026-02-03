@@ -1,4 +1,7 @@
-<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Comentarios - Apocalipsis</title>
@@ -7,7 +10,9 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Merriweather:wght@300;400;700&amp;family=SBL+Hebrew&amp;display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Merriweather:wght@300;400;700&amp;family=SBL+Hebrew&amp;display=swap"
+        rel="stylesheet" />
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
 
@@ -218,6 +223,7 @@
             text-decoration: none;
             font-size: 0.9rem;
         }
+
         .bible-meta {
             font-size: 0.85rem;
             font-style: italic;
@@ -226,7 +232,47 @@
             margin-top: 0.5rem;
             border-top: 1px dashed #e2e8f0;
             padding-top: 0.3rem;
-        }    </style>
+        }
+
+        .btn-edit {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-right: 0.5rem;
+        }
+
+        .btn-edit:hover {
+            background: var(--accent-hover);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: #e53e3e;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: #c53030;
+            color: white;
+            transform: translateY(-1px);
+        }
+    </style>
 </head>
 
 <body>
@@ -299,7 +345,7 @@
 
         <div class="chapter-container" id="1">
             <h2 class="chapter-title">Capítulo 1</h2>
-            
+
             <nav class="verse-nav mb-4">
                 <span class="verse-nav-title">Versículos</span>
                 <div class="verse-grid">
@@ -323,29 +369,39 @@
                     <a href="#1.18" class="v-link">18</a>
                     <a href="#1.19" class="v-link">19</a>
                     <a href="#1.20" class="v-link">20</a>
-                    
+
                 </div>
             </nav>
 
             <div class="verse-block" id="1.1">
                 <span class="verse-ref">1:1</span>
-                <p class="verse-text"><span class="original-text">1 Ἀποκάλυψις Ἰησοῦ Χριστοῦ, ἣν ἔδωκεν αὐτῷ ὁ θεὸς δεῖξαι τοῖς δούλοις αὐτοῦ, ἃ δεῖ γενέσθαι ἐν τάχει, καὶ ἐσήμανεν ἀποστείλας διὰ τοῦ ἀγγέλου αὐτοῦ τῷ δούλῳ αὐτοῦ Ἰωάννῃ,</span><br /><span class="translation-text">La revelación de Jesucristo 1 La revelación de Jesucristo, que Dios le dio, para mostrar a sus siervos las cosas que deben suceder pronto; y la dio a conocer, enviándo la por medio de su ángel a su siervo Juan,</span></p>
+                <p class="verse-text"><span class="original-text">1 Ἀποκάλυψις Ἰησοῦ Χριστοῦ, ἣν ἔδωκεν αὐτῷ ὁ θεὸς
+                        δεῖξαι τοῖς δούλοις αὐτοῦ, ἃ δεῖ γενέσθαι ἐν τάχει, καὶ ἐσήμανεν ἀποστείλας διὰ τοῦ ἀγγέλου
+                        αὐτοῦ τῷ δούλῳ αὐτοῦ Ἰωάννῃ,</span><br /><span class="translation-text">La revelación de
+                        Jesucristo 1 La revelación de Jesucristo, que Dios le dio, para mostrar a sus siervos las cosas
+                        que deben suceder pronto; y la dio a conocer, enviándo la por medio de su ángel a su siervo
+                        Juan,</span></p>
                 <div class="commentary">
                     <p>Espacio para comentarios del libro de Apocalipsis.</p>
                 </div>
-            
-                <a href="editor-web.html?action=delete&amp;book=apocalipsis&amp;chapter=1&amp;verse=1" class="btn-delete">🗑️ Borrar</a></div>
-            
+
+                <a href="editor-web.html?book=apocalipsis&amp;chapter=1&amp;verse=1" class="btn-edit">✏️ Editar</a>
+                <a href="editor-web.html?action=delete&amp;book=apocalipsis&amp;chapter=1&amp;verse=1"
+                    class="btn-delete">🗑️ Borrar</a>
+            </div>
+
             <div class="return-top">
                 <a href="#top">↑ Volver Arriba</a>
             </div>
         </div>
-        
-<!-- END CHAPTER CONTENT -->
+
+        <!-- END CHAPTER CONTENT -->
 
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 
-</body></html>
+</body>
+
+</html>
