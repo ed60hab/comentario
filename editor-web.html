@@ -443,6 +443,16 @@
             color: #718096;
             margin-top: 0.25rem;
         }
+
+        .bible-meta {
+            font-size: 0.85rem;
+            font-style: italic;
+            color: #718096;
+            display: block;
+            margin-top: 0.5rem;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 0.3rem;
+        }
     </style>
 </head>
 
@@ -1369,11 +1379,32 @@
                     const passages = doc.querySelectorAll('.passage-content');
                     let versions = [];
                     passages.forEach(p => {
-                        // Limpiar texto
-                        const sups = p.querySelectorAll('sup');
+                        let rawHtml = p.innerHTML;
+                        // Remover "Read full chapter" y similares
+                        rawHtml = rawHtml.replace(/Read full chapter/gi, '');
+                        // Manejar Footnotes y Cross references
+                        rawHtml = rawHtml.replace(/(Footnotes|Cross references|Referencias Cruzadas|Notas al pie)/gi, '<br><span class="bible-meta">$1</span>');
+
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = rawHtml;
+
+                        // Remover sups
+                        const sups = tempDiv.querySelectorAll('sup');
                         sups.forEach(s => s.remove());
-                        let text = p.textContent.replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
-                        if (text && !text.includes('Full chapter')) versions.push(text);
+
+                        // Limpiar texto manteniendo estructura básica
+                        let text = tempDiv.innerHTML
+                            .replace(/<[^>]*>/g, (tag) => {
+                                if (tag.includes('class="bible-meta"')) return tag;
+                                if (tag.startsWith('<br')) return '<br>';
+                                return ' ';
+                            })
+                            .replace(/&nbsp;/g, ' ')
+                            .replace(/\s+/g, ' ')
+                            .replace(/<br>\s+/g, '<br>')
+                            .trim();
+
+                        if (text) versions.push(text);
                     });
                     const gnt = versions[0] || "";
                     const lbla = versions[1] || "";

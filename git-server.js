@@ -182,8 +182,26 @@ app.get('/fetch-bible', (req, res) => {
                 let versions = [];
                 let match;
                 while ((match = passageRegex.exec(data)) !== null) {
-                    let text = match[1].replace(/<sup[^>]*>.*?<\/sup>/g, '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
-                    if (text && !text.includes('Full chapter')) versions.push(text);
+                    let rawHtml = match[1];
+                    // Remover "Read full chapter" y similares
+                    rawHtml = rawHtml.replace(/Read full chapter/gi, '');
+
+                    // Manejar Footnotes y Cross references
+                    rawHtml = rawHtml.replace(/(Footnotes|Cross references|Referencias Cruzadas|Notas al pie)/gi, '<br><span class="bible-meta">$1</span>');
+
+                    let text = rawHtml
+                        .replace(/<sup[^>]*>.*?<\/sup>/g, '') // Remover números de versículo internos si los hay
+                        .replace(/<[^>]*>/g, (tag) => {
+                            if (tag.includes('class="bible-meta"')) return tag;
+                            if (tag.startsWith('<br')) return '<br>';
+                            return ' ';
+                        })
+                        .replace(/&nbsp;/g, ' ')
+                        .replace(/\s+/g, ' ')
+                        .replace(/<br>\s+/g, '<br>')
+                        .trim();
+
+                    if (text) versions.push(text);
                 }
                 const gnt = versions[0] || "";
                 const lbla = versions[1] || "";
