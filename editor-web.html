@@ -390,6 +390,35 @@
             opacity: 0.9;
         }
 
+        /* Rich Text Bible Fields */
+        .bible-editor-field {
+            width: 100%;
+            min-height: 100px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 0.8rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            background: white;
+            font-family: 'Merriweather', serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            outline: none;
+            text-align: left;
+        }
+
+        .bible-editor-field:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(128, 90, 213, 0.1);
+        }
+
+        .original-field {
+            font-family: 'SBL Hebrew', 'Times New Roman', serif;
+            font-size: 1.2rem;
+            direction: rtl;
+            text-align: right;
+        }
+
         /* Config Modal Styles */
         .config-group {
             margin-bottom: 1rem;
@@ -491,19 +520,20 @@
                 <div class="split-editor-container">
                     <div class="split-editor-col">
                         <label>Texto Original (Hebreo/Griego)</label>
-                        <textarea id="originalText" placeholder="Texto en idioma original..."
-                            style="font-family: 'SBL Hebrew', 'Times New Roman', serif;"></textarea>
+                        <div id="originalText" class="bible-editor-field original-field" contenteditable="true"
+                            onfocus="setActiveEditor('originalText')" placeholder="Texto en idioma original..."></div>
                     </div>
                     <div class="split-editor-col">
                         <label>Traducción (LBLA)</label>
-                        <textarea id="translationText" placeholder="Traducción al español..."></textarea>
+                        <div id="translationText" class="bible-editor-field" contenteditable="true"
+                            onfocus="setActiveEditor('translationText')" placeholder="Traducción al español..."></div>
                     </div>
                 </div>
                 <!-- Hidden legacy input just in case -->
                 <input type="hidden" id="bibleVerseText">
             </div>
 
-            <div id="editor" contenteditable="true">
+            <div id="editor" contenteditable="true" onfocus="setActiveEditor('editor')">
                 <p>Escribe tu comentario aquí...</p>
             </div>
 
@@ -585,6 +615,31 @@
             ['α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ'],
             ['ν', 'ξ', 'ο', 'π', 'ρ', 'ς', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω']
         ];
+
+        let activeEditorId = 'editor';
+
+        function setActiveEditor(id) {
+            activeEditorId = id;
+            console.log('Editor activo:', id);
+        }
+
+        function formatText(command, value = null) {
+            const editor = document.getElementById(activeEditorId);
+            editor.focus();
+            document.execCommand(command, false, value);
+        }
+
+        function insertParagraph() {
+            const editor = document.getElementById(activeEditorId);
+            editor.focus();
+            document.execCommand('insertParagraph', false, null);
+        }
+
+        function insertChar(char) {
+            const editor = document.getElementById(activeEditorId);
+            editor.focus();
+            document.execCommand('insertText', false, char);
+        }
 
         function createKeyboard(id, rows) {
             const container = document.getElementById(id);
@@ -1006,17 +1061,18 @@
                                 const transSpan = bibleText.querySelector('.translation-text');
 
                                 if (origSpan && transSpan) {
-                                    document.getElementById('originalText').value = origSpan.innerHTML.replace(/<br\s*\/?>/gi, '\n');
-                                    document.getElementById('translationText').value = transSpan.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+                                    document.getElementById('originalText').innerHTML = origSpan.innerHTML;
+                                    document.getElementById('translationText').innerHTML = transSpan.innerHTML;
                                 } else {
                                     // Fallback estructura antigua
-                                    const fullText = bibleText.innerHTML.replace(/<br\s*\/?>/gi, '\n');
-                                    const parts = fullText.split('\n');
+                                    const fullText = bibleText.innerHTML.trim();
+                                    const parts = fullText.split(/<br\s*\/?>/i);
                                     if (parts.length > 1) {
-                                        document.getElementById('originalText').value = parts[0];
-                                        document.getElementById('translationText').value = parts.slice(1).join('\n');
+                                        document.getElementById('originalText').innerHTML = parts[0];
+                                        document.getElementById('translationText').innerHTML = parts.slice(1).join('<br>');
                                     } else {
-                                        document.getElementById('translationText').value = fullText;
+                                        document.getElementById('translationText').innerHTML = fullText;
+                                        document.getElementById('originalText').innerHTML = '';
                                     }
                                 }
                             }
@@ -1067,12 +1123,12 @@
                 // Get updated content
                 const editor = document.getElementById('editor');
                 const updatedContent = editor.innerHTML;
-                const origText = document.getElementById('originalText').value;
-                const transText = document.getElementById('translationText').value;
+                const origText = document.getElementById('originalText').innerHTML;
+                const transText = document.getElementById('translationText').innerHTML;
 
                 let bibleTextHTML = '';
-                if (origText) bibleTextHTML += `<span class="original-text">${origText.replace(/\n/g, '<br>')}</span><br>`;
-                bibleTextHTML += `<span class="translation-text">${transText.replace(/\n/g, '<br>')}</span>`;
+                if (origText) bibleTextHTML += `<span class="original-text">${origText}</span><br>`;
+                bibleTextHTML += `<span class="translation-text">${transText}</span>`;
 
                 // Parse ORIGINAL HTML
                 const parser = new DOMParser();
@@ -1205,19 +1261,33 @@
         }
 
         async function fetchBibleText() {
-            // Limited functionality in web mode due to CORS
             const originalField = document.getElementById('originalText');
             const translationField = document.getElementById('translationText');
-
-            // Try direct fetch for WLC (if allowed) or fallback to manual
             const book = selectionState.book.title;
+            const chapter = selectionState.chapter;
+            const verse = selectionState.verse;
 
-            // Check if OT (WLC might work if CORS allowed, otherwise fail)
-            // Using JSONP or Proxy is needed for cross-domain. 
-            // For now, we inform users.
+            originalField.innerHTML = "Cargando...";
+            translationField.innerHTML = "Cargando...";
 
-            // translationField.value = "⚠️ En modo Web, la carga automática suele bloquearse por seguridad (CORS). Copia y pega el texto aquí.";
-            // originalField.value = "";
+            // Si estamos en local (localhost/127.0.0.1/192.168...), podemos intentar usar el proxy del servidor
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+
+            if (isLocal) {
+                try {
+                    const url = `/fetch-bible?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
+                    const resp = await fetch(url);
+                    const data = await resp.json();
+                    if (data.text || data.lbla || data.wlc) {
+                        originalField.innerHTML = data.wlc || '';
+                        translationField.innerHTML = data.lbla || data.text || '';
+                        return;
+                    }
+                } catch (e) { console.warn("Fallo fetch local en editor-web", e); }
+            }
+
+            translationField.innerHTML = "⚠️ En modo Web puro (GitHub Pages), la carga automática está limitada por seguridad (CORS).<br><br>Si tienes el servidor de Node corriendo localmente, intenta usar el <b>Editor Local</b> o configura el acceso CORS en el servidor.";
+            originalField.innerHTML = "";
         }
 
         async function verifyVerse() {

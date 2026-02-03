@@ -217,7 +217,19 @@ app.get('/fetch-bible', (req, res) => {
 
                     const verseRegex = new RegExp(`<div class=["']verse["']>\\s*<span class=["']verse-number["']>${vNum}</span>\\s*<span class=["']verse-text[^"']*["']>([\\s\\S]*?)</span>\\s*</div>`, 'i');
                     const match = colMatch[1].match(verseRegex);
-                    return match ? match[1].replace(/<[^>]*>/g, '').trim() : null;
+                    if (!match) return null;
+
+                    // Limpieza inteligente: mantenemos espacios entre etiquetas y eliminamos etiquetas ruidosas
+                    // pero dejamos etiquetas que puedan ser útiles o al menos no pegamos palabras.
+                    return match[1]
+                        .replace(/<link[^>]*>|<style[^>]*>|<script[^>]*>|<!--[\s\S]*?-->/gi, '') // Eliminar etiquetas peligrosas/ruidosas
+                        .replace(/<\/?[a-z][^>]*>/gi, (tag) => {
+                            // Reemplazar la mayoría de etiquetas por un espacio para evitar pegar palabras
+                            // a menos que sean etiquetas de formato básicas que queramos intentar mantener (opcional)
+                            return ' ';
+                        })
+                        .replace(/\s+/g, ' ') // Colapsar espacios múltiples
+                        .trim();
                 };
 
                 const lblaText = getVerseFromColumn(chapterHtml, 'lbla', verse);

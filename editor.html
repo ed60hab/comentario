@@ -389,6 +389,35 @@
         .btn-fetch-bible:hover {
             opacity: 0.9;
         }
+
+        /* Rich Text Bible Fields */
+        .bible-editor-field {
+            width: 100%;
+            min-height: 100px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 0.8rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            background: white;
+            font-family: 'Merriweather', serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            outline: none;
+            text-align: left;
+        }
+
+        .bible-editor-field:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+
+        .original-field {
+            font-family: 'SBL Hebrew', 'Times New Roman', serif;
+            font-size: 1.2rem;
+            direction: rtl;
+            text-align: right;
+        }
     </style>
 </head>
 
@@ -464,19 +493,20 @@
                 <div class="split-editor-container">
                     <div class="split-editor-col">
                         <label>Texto Original (Hebreo/Griego)</label>
-                        <textarea id="originalText" placeholder="Texto en idioma original..."
-                            style="font-family: 'SBL Hebrew', 'Times New Roman', serif;"></textarea>
+                        <div id="originalText" class="bible-editor-field original-field" contenteditable="true"
+                            onfocus="setActiveEditor('originalText')" placeholder="Texto en idioma original..."></div>
                     </div>
                     <div class="split-editor-col">
                         <label>Traducción (LBLA)</label>
-                        <textarea id="translationText" placeholder="Traducción al español..."></textarea>
+                        <div id="translationText" class="bible-editor-field" contenteditable="true"
+                            onfocus="setActiveEditor('translationText')" placeholder="Traducción al español..."></div>
                     </div>
                 </div>
                 <!-- Hidden legacy input just in case -->
                 <input type="hidden" id="bibleVerseText">
             </div>
 
-            <div id="editor" contenteditable="true">
+            <div id="editor" contenteditable="true" onfocus="setActiveEditor('editor')">
                 <p>Escribe tu comentario aquí...</p>
             </div>
 
@@ -643,6 +673,13 @@
             originalHTML: null
         };
 
+        let activeEditorId = 'editor'; // Por defecto el editor de comentarios
+
+        function setActiveEditor(id) {
+            activeEditorId = id;
+            console.log('Editor activo:', id);
+        }
+
         // Load books data from index.html
         // Load books data from index.html with retry
         async function loadBooksData(retries = 3, delay = 1000) {
@@ -701,16 +738,19 @@
         }
 
         function formatText(command, value = null) {
+            const editor = document.getElementById(activeEditorId);
+            editor.focus();
             document.execCommand(command, false, value);
-            document.getElementById('editor').focus();
         }
 
         function insertParagraph() {
+            const editor = document.getElementById(activeEditorId);
+            editor.focus();
             document.execCommand('insertParagraph', false, null);
         }
 
         function insertChar(char) {
-            const editor = document.getElementById('editor');
+            const editor = document.getElementById(activeEditorId);
             editor.focus();
             document.execCommand('insertText', false, char);
         }
@@ -1109,8 +1149,8 @@ ${verseLink}
 
             if (!book || !chapter || !verse) return;
 
-            originalField.value = "Cargando...";
-            translationField.value = "Cargando...";
+            originalField.innerHTML = "Cargando...";
+            translationField.innerHTML = "Cargando...";
 
             try {
                 const url = `/fetch-bible?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
@@ -1118,16 +1158,16 @@ ${verseLink}
                 const data = await resp.json();
 
                 if (data.text || data.lbla || data.wlc) {
-                    originalField.value = data.wlc || '';
-                    translationField.value = data.lbla || data.text || ''; // Fallback a text si lbla falta
+                    originalField.innerHTML = data.wlc || '';
+                    translationField.innerHTML = data.lbla || data.text || ''; // Fallback a text si lbla falta
                 } else {
-                    translationField.value = `(No se pudo cargar el texto automáticamente para ${book} ${chapter}:${verse})`;
-                    originalField.value = '';
+                    translationField.innerHTML = `(No se pudo cargar el texto automáticamente para ${book} ${chapter}:${verse})`;
+                    originalField.innerHTML = '';
                 }
             } catch (e) {
                 console.error('Error fetching Bible:', e);
-                translationField.value = `(Error de conexión al cargar ${book} ${chapter}:${verse})`;
-                originalField.value = '';
+                translationField.innerHTML = `(Error de conexión al cargar ${book} ${chapter}:${verse})`;
+                originalField.innerHTML = '';
             }
         }
 
@@ -1308,14 +1348,14 @@ ${verseLink}
                 const editor = document.getElementById('editor');
                 const updatedContent = editor.innerHTML;
 
-                const origText = document.getElementById('originalText').value;
-                const transText = document.getElementById('translationText').value;
+                const origText = document.getElementById('originalText').innerHTML;
+                const transText = document.getElementById('translationText').innerHTML;
 
                 let bibleTextHTML = '';
                 if (origText) {
-                    bibleTextHTML += `<span class="original-text">${origText.replace(/\n/g, '<br>')}</span><br>`;
+                    bibleTextHTML += `<span class="original-text">${origText}</span><br>`;
                 }
-                bibleTextHTML += `<span class="translation-text">${transText.replace(/\n/g, '<br>')}</span>`;
+                bibleTextHTML += `<span class="translation-text">${transText}</span>`;
 
                 // Parse the original book HTML
                 const parser = new DOMParser();
@@ -1474,18 +1514,18 @@ ${verseLink}
                             const transSpan = verseTextElem.querySelector('.translation-text');
 
                             if (origSpan && transSpan) {
-                                document.getElementById('originalText').value = origSpan.innerHTML.replace(/<br\s*\/?>/gi, '\n');
-                                document.getElementById('translationText').value = transSpan.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+                                document.getElementById('originalText').innerHTML = origSpan.innerHTML;
+                                document.getElementById('translationText').innerHTML = transSpan.innerHTML;
                             } else {
                                 // Legacy fallback
-                                const val = verseTextElem.innerHTML.replace(/<br\s*\/?>/gi, '\n').trim();
-                                const parts = val.split('\n');
+                                const val = verseTextElem.innerHTML.trim();
+                                const parts = val.split(/<br\s*\/?>/i);
                                 if (parts.length > 1) {
-                                    document.getElementById('originalText').value = parts[0];
-                                    document.getElementById('translationText').value = parts.slice(1).join('\n');
+                                    document.getElementById('originalText').innerHTML = parts[0];
+                                    document.getElementById('translationText').innerHTML = parts.slice(1).join('<br>');
                                 } else {
-                                    document.getElementById('translationText').value = val;
-                                    document.getElementById('originalText').value = '';
+                                    document.getElementById('translationText').innerHTML = val;
+                                    document.getElementById('originalText').innerHTML = '';
                                 }
                             }
 
