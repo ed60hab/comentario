@@ -1380,31 +1380,46 @@
                     let versions = [];
                     passages.forEach(p => {
                         let rawHtml = p.innerHTML;
-                        // Remover "Read full chapter" y similares
+
+                        // 1. Limpieza agressiva de comentarios y basura
+                        rawHtml = rawHtml.replace(/<!--[\s\S]*?-->/g, '');
                         rawHtml = rawHtml.replace(/Read full chapter/gi, '');
-                        // Manejar Footnotes y Cross references
-                        rawHtml = rawHtml.replace(/(Footnotes|Cross references|Referencias Cruzadas|Notas al pie)/gi, '<br><span class="bible-meta">$1</span>');
 
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = rawHtml;
+                        // 2. Separar cuerpo y metadatos
+                        const metaIndex = rawHtml.search(/(Footnotes|Cross references|Referencias Cruzadas|Notas al pie)/i);
+                        let bodyHtml = rawHtml;
+                        let metaHtml = '';
 
-                        // Remover sups
-                        const sups = tempDiv.querySelectorAll('sup');
-                        sups.forEach(s => s.remove());
+                        if (metaIndex !== -1) {
+                            bodyHtml = rawHtml.substring(0, metaIndex);
+                            metaHtml = rawHtml.substring(metaIndex);
+                        }
 
-                        // Limpiar texto manteniendo estructura básica
-                        let text = tempDiv.innerHTML
-                            .replace(/<[^>]*>/g, (tag) => {
-                                if (tag.includes('class="bible-meta"')) return tag;
-                                if (tag.startsWith('<br')) return '<br>';
-                                return ' ';
-                            })
-                            .replace(/&nbsp;/g, ' ')
-                            .replace(/\s+/g, ' ')
-                            .replace(/<br>\s+/g, '<br>')
-                            .trim();
+                        const cleanInBrowser = (h, isMeta = false) => {
+                            const temp = document.createElement('div');
+                            temp.innerHTML = h;
+                            // Quitar sups
+                            temp.querySelectorAll('sup').forEach(s => s.remove());
 
-                        if (text) versions.push(text);
+                            let text = temp.innerHTML
+                                .replace(/<[^>]*>/g, (tag) => {
+                                    if (tag.startsWith('<br')) return '<br>';
+                                    return ' ';
+                                })
+                                .replace(/&nbsp;/g, ' ')
+                                .replace(/\s+/g, ' ')
+                                .replace(/<br>\s+/g, '<br>')
+                                .trim();
+
+                            return isMeta ? `<span class="bible-meta">${text}</span>` : text;
+                        };
+
+                        let finalVerse = cleanInBrowser(bodyHtml);
+                        if (metaHtml) {
+                            finalVerse += '<br>' + cleanInBrowser(metaHtml, true);
+                        }
+
+                        if (finalVerse) versions.push(finalVerse);
                     });
                     const gnt = versions[0] || "";
                     const lbla = versions[1] || "";

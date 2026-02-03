@@ -183,25 +183,43 @@ app.get('/fetch-bible', (req, res) => {
                 let match;
                 while ((match = passageRegex.exec(data)) !== null) {
                     let rawHtml = match[1];
-                    // Remover "Read full chapter" y similares
+
+                    // 1. Limpieza agresiva de comentarios y basura de BibleGateway
+                    rawHtml = rawHtml.replace(/<!--[\s\S]*?-->/g, '');
                     rawHtml = rawHtml.replace(/Read full chapter/gi, '');
 
-                    // Manejar Footnotes y Cross references
-                    rawHtml = rawHtml.replace(/(Footnotes|Cross references|Referencias Cruzadas|Notas al pie)/gi, '<br><span class="bible-meta">$1</span>');
+                    // 2. Identificar inicio de metadatos (Footnotes / Cross references / etc)
+                    const metaIndex = rawHtml.search(/(Footnotes|Cross references|Referencias Cruzadas|Notas al pie)/i);
+                    let bodyHtml = rawHtml;
+                    let metaHtml = '';
 
-                    let text = rawHtml
-                        .replace(/<sup[^>]*>.*?<\/sup>/g, '') // Remover números de versículo internos si los hay
-                        .replace(/<[^>]*>/g, (tag) => {
-                            if (tag.includes('class="bible-meta"')) return tag;
-                            if (tag.startsWith('<br')) return '<br>';
-                            return ' ';
-                        })
-                        .replace(/&nbsp;/g, ' ')
-                        .replace(/\s+/g, ' ')
-                        .replace(/<br>\s+/g, '<br>')
-                        .trim();
+                    if (metaIndex !== -1) {
+                        bodyHtml = rawHtml.substring(0, metaIndex);
+                        metaHtml = rawHtml.substring(metaIndex);
+                    }
 
-                    if (text) versions.push(text);
+                    // 3. Limpiar el cuerpo y el meta de etiquetas HTML no deseadas (excepto br y meta span)
+                    const clean = (h, isMeta = false) => {
+                        let text = h
+                            .replace(/<sup[^>]*>.*?<\/sup>/g, '') // Quitar números internos
+                            .replace(/<[^>]*>/g, (tag) => {
+                                if (tag.startsWith('<br')) return '<br>';
+                                return ' ';
+                            })
+                            .replace(/&nbsp;/g, ' ')
+                            .replace(/\s+/g, ' ')
+                            .replace(/<br>\s+/g, '<br>')
+                            .trim();
+
+                        return isMeta ? `<span class="bible-meta">${text}</span>` : text;
+                    };
+
+                    let finalVerse = clean(bodyHtml);
+                    if (metaHtml) {
+                        finalVerse += '<br>' + clean(metaHtml, true);
+                    }
+
+                    if (finalVerse) versions.push(finalVerse);
                 }
                 const gnt = versions[0] || "";
                 const lbla = versions[1] || "";
