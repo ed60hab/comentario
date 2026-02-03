@@ -22,8 +22,11 @@ app.get('/', (req, res) => {
 // Endpoint para actualizar archivos
 app.post('/update-file', (req, res) => {
     const { filename, content, commitMessage } = req.body;
+    console.log(`\n--- Update File Request: ${filename} ---`);
+    console.time('Total Update Time');
 
     if (!filename || !content || !commitMessage) {
+        console.timeEnd('Total Update Time');
         return res.status(400).json({
             success: false,
             error: 'Faltan parámetros requeridos'
@@ -32,79 +35,54 @@ app.post('/update-file', (req, res) => {
 
     const filePath = path.join(REPO_PATH, filename);
 
-    try {
-        // Guardar archivo
-        fs.writeFileSync(filePath, content, 'utf8');
-        console.log(`✅ Archivo guardado: ${filename}`);
-
-        // Comandos Git
-        // Detectar OS para comando Git
-        const isWindows = process.platform === "win32";
-        let gitPath = "git";
-
-        if (isWindows) {
-            const possiblePaths = [
-                "C:\\Program Files\\Git\\cmd\\git.exe",
-                "C:\\Program Files\\Git\\bin\\git.exe",
-                process.env.LOCALAPPDATA + "\\GitHubDesktop\\app-3.5.4\\resources\\app\\git\\cmd\\git.exe", // Version specific, fallback
-            ];
-
-            for (const p of possiblePaths) {
-                if (fs.existsSync(p)) {
-                    gitPath = `"${p}"`;
-                    break;
-                }
-            }
+    // Guardar archivo
+    fs.writeFile(filePath, content, 'utf8', (err) => {
+        if (err) {
+            console.timeEnd('Total Update Time');
+            return res.status(500).json({ success: false, error: err.message });
         }
 
-        console.log(`ℹ️  Usando Git en: ${gitPath}`);
+        console.log(`File ${filename} saved locally.`);
+        console.time('Git Sync');
 
-        const commands = [
-            `cd "${REPO_PATH}"`,
-            `${gitPath} pull origin main`, // Sincronizar antes de guardar para evitar conflictos
-            `${gitPath} add "${filename}"`,
-            `(${gitPath} commit -m "${commitMessage}" || echo "⚠️ Nada que registrar")`,
-            `${gitPath} push origin main`
-        ].join(' && ');
+        // Intentar git add, commit y push
+        exec(`git add "${filename}" && git commit -m "${commitMessage || 'Update ' + filename}" && git push origin main`,
+            { cwd: REPO_PATH },
+            (gitErr, stdout, stderr) => {
+                console.timeEnd('Git Sync');
+                console.timeEnd('Total Update Time');
+                if (gitErr) {
+                    console.error('❌ Error en Git:', stderr);
+                    // Return 200 OK because file WAS saved, but with gitError
+                    return res.json({
+                        success: true,
+                        message: 'Archivo guardado localmente, pero falló la sincronización con GitHub',
+                        gitError: stderr || gitErr.message,
+                        output: stdout
+                    });
+                }
 
-        console.log('🔄 Ejecutando comandos Git...');
+                console.log('✅ Cambios publicados exitosamente');
+                console.log(stdout);
 
-        exec(commands, (error, stdout, stderr) => {
-            if (error) {
-                console.error('❌ Error en Git:', stderr);
-                // Return 200 OK because file WAS saved, but with gitError
-                return res.json({
+                res.json({
                     success: true,
-                    message: 'Archivo guardado localmente, pero falló la sincronización con GitHub',
-                    gitError: stderr || error.message,
+                    message: 'Archivo actualizado y publicado en GitHub',
                     output: stdout
                 });
-            }
-
-            console.log('✅ Cambios publicados exitosamente');
-            console.log(stdout);
-
-            res.json({
-                success: true,
-                message: 'Archivo actualizado y publicado en GitHub',
-                output: stdout
             });
-        });
-
-    } catch (error) {
-        console.error('❌ Error al guardar archivo:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
+    });
 });
 
 // Endpoint para obtener texto bíblico (Proxy para evitar CORS)
 const https = require('https');
 app.get('/fetch-bible', (req, res) => {
     const { book, chapter, verse } = req.query;
+    console.log(`\n--- Fetch Bible Request: ${book} ${chapter}:${verse} ---`);
+    console.time('Total Fetch Time');
+
     if (!book || !chapter || !verse) {
+        console.timeEnd('Total Fetch Time');
         return res.status(400).json({ error: 'Faltan parámetros' });
     }
 
@@ -174,10 +152,15 @@ app.get('/fetch-bible', (req, res) => {
         const bibleBook = book.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const url = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(bibleBook)}+${chapter}:${verse}&version=SBLGNT;LBLA`;
         const options = { headers: { 'User-Agent': 'Mozilla/5.0' } };
+        console.log(`Fetching NT from BibleGateway: ${url}`);
+        console.time('BibleGateway Download');
+
         https.get(url, options, (response) => {
             let data = '';
             response.on('data', (chunk) => { data += chunk; });
             response.on('end', () => {
+                console.timeEnd('BibleGateway Download');
+                console.time('BibleGateway Processing');
                 const passageRegex = /<div class=["']passage-content[^"']*["']>([\s\S]*?)<\/div>/g;
                 let versions = [];
                 let match;
@@ -223,24 +206,35 @@ app.get('/fetch-bible', (req, res) => {
                 }
                 const gnt = versions[0] || "";
                 const lbla = versions[1] || "";
+                console.timeEnd('BibleGateway Processing');
+                console.timeEnd('Total Fetch Time');
                 res.json({ lbla, wlc: gnt, text: gnt ? `${gnt}\n${lbla}` : lbla });
             });
-        }).on('error', (err) => res.status(500).json({ error: err.message }));
+        }).on('error', (err) => {
+            console.timeEnd('Total Fetch Time');
+            res.status(500).json({ error: err.message });
+        });
     } else {
 
         const url = `https://wlc.consoft.site/${fileName}`;
         const options = {
             headers: { 'User-Agent': 'Mozilla/5.0' }
         };
+        console.log(`Fetching OT from wlc.consoft.site: ${url}`);
+        console.time('WLC Download');
 
         https.get(url, options, (response) => {
             let data = '';
             response.on('data', (chunk) => { data += chunk; });
             response.on('end', () => {
-                // 1. Isolar el capítulo
+                console.timeEnd('WLC Download');
+                console.time('WLC Processing');
+                // 1. Isolar el capítulo de forma más eficiente
                 const chapterRegex = new RegExp(`<div id=["']${chapter}["'] class=["']chapter[^"']*["']>([\\s\\S]*?)<div class=["']navigation[^"']*["']>`, 'i');
                 const chapterMatch = data.match(chapterRegex);
                 if (!chapterMatch) {
+                    console.timeEnd('WLC Processing');
+                    console.timeEnd('Total Fetch Time');
                     return res.json({ text: `(Capítulo ${chapter} no encontrado en ${book})` });
                 }
                 const chapterHtml = chapterMatch[1];
@@ -273,19 +267,75 @@ app.get('/fetch-bible', (req, res) => {
                 const wlcText = getVerseFromColumn(chapterHtml, 'wlc', verse);
 
                 if (!lblaText && !wlcText) {
+                    console.timeEnd('WLC Processing');
+                    console.timeEnd('Total Fetch Time');
                     return res.json({ text: `(Versículo ${chapter}:${verse} no encontrado)` });
                 }
 
-                res.json({
-                    lbla: lblaText || "(Texto LBLA no encontrado)",
-                    wlc: wlcText || "",
-                    text: wlcText ? `${wlcText}\n${lblaText}` : lblaText // Retrocompatibilidad y facilidad
-                });
+                console.timeEnd('WLC Processing');
+                console.timeEnd('Total Fetch Time');
+                res.json({ lbla: lblaText, wlc: wlcText, text: wlcText ? `${wlcText}\n${lblaText}` : lblaText });
             });
         }).on('error', (err) => {
+            console.timeEnd('Total Fetch Time');
             res.status(500).json({ error: err.message });
         });
     }
+});
+
+// Endpoint para actualizar archivos y sincronizar con git
+app.post('/update-file', (req, res) => {
+    const { filename, content, commitMessage } = req.body;
+    console.log(`\n--- Update File Request: ${filename} ---`);
+    console.time('Total Update Time');
+
+    if (!filename || !content || !commitMessage) {
+        console.timeEnd('Total Update Time');
+        return res.status(400).json({
+            success: false,
+            error: 'Faltan parámetros requeridos'
+        });
+    }
+
+    const filePath = path.join(REPO_PATH, filename);
+
+    // Guardar archivo
+    fs.writeFile(filePath, content, 'utf8', (err) => {
+        if (err) {
+            console.timeEnd('Total Update Time');
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        console.log(`File ${filename} saved locally.`);
+        console.time('Git Sync');
+
+        // Intentar git add, commit y push
+        exec(`git add "${filename}" && git commit -m "${commitMessage || 'Update ' + filename}" && git push origin main`,
+            { cwd: REPO_PATH },
+            (gitErr, stdout, stderr) => {
+                console.timeEnd('Git Sync');
+                console.timeEnd('Total Update Time');
+                if (gitErr) {
+                    console.error('❌ Error en Git:', stderr);
+                    // Return 200 OK because file WAS saved, but with gitError
+                    return res.json({
+                        success: true,
+                        message: 'Archivo guardado localmente, pero falló la sincronización con GitHub',
+                        gitError: stderr || gitErr.message,
+                        output: stdout
+                    });
+                }
+
+                console.log('✅ Cambios publicados exitosamente');
+                console.log(stdout);
+
+                res.json({
+                    success: true,
+                    message: 'Archivo actualizado y publicado en GitHub',
+                    output: stdout
+                });
+            });
+    });
 });
 
 // Endpoint de depuración

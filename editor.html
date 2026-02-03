@@ -1432,6 +1432,17 @@ ${verseLink}
 
                 // Try automatic update via server first
                 try {
+                    const saveBtn = document.getElementById('publishBtn');
+                    const saveKeepBtn = document.getElementById('saveKeepBtn');
+                    const originalSaveText = saveBtn.textContent;
+                    const originalSaveKeepText = saveKeepBtn.textContent;
+
+                    // Step 1: Saving locally
+                    saveBtn.textContent = "⏳ Guardando en PC...";
+                    saveKeepBtn.textContent = "⏳ Guardando...";
+                    saveBtn.disabled = true;
+                    saveKeepBtn.disabled = true;
+
                     const response = await fetch('/update-file', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1443,12 +1454,24 @@ ${verseLink}
                     });
 
                     if (!response.ok) {
+                        saveBtn.textContent = originalSaveText;
+                        saveKeepBtn.textContent = originalSaveKeepText;
+                        saveBtn.disabled = false;
+                        saveKeepBtn.disabled = false;
                         const errorText = await response.text();
                         console.error('Error del servidor:', errorText);
                         throw new Error(`Error del servidor (${response.status})`);
                     }
 
+                    // Step 2: Waiting for GitHub Sync (The server is already doing it, but we wait for response)
+                    saveBtn.textContent = "☁️ Sincronizando con GitHub...";
+                    saveKeepBtn.textContent = "☁️ Sincronizando...";
+
                     const result = await response.json();
+
+                    saveBtn.disabled = false;
+                    saveKeepBtn.disabled = false;
+
                     if (result.success) {
                         if (result.gitError) {
                             alert('⚠️ GUARDADO EN PC, PERO ERROR DE SINCRONIZACIÓN:\n\nEl archivo se guardó correctamente en tu ordenador, pero no se pudo subir a GitHub.\n\nError: ' + result.gitError);
