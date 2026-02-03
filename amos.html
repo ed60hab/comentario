@@ -1,20 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Comentarios - Amós</title>
-    <link rel="icon" type="image/png" sizes="512x512" href="./img/torah_scroll.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./img/torah_scroll.png" />
 
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&family=SBL+Hebrew&display=swap"
-        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Merriweather:wght@300;400;700&amp;family=SBL+Hebrew&amp;display=swap" rel="stylesheet" />
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
 
     <style>
         :root {
@@ -231,7 +226,43 @@
             margin-top: 0.5rem;
             border-top: 1px dashed #e2e8f0;
             padding-top: 0.3rem;
-        }    </style>
+        }    
+        .btn-edit {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-right: 0.5rem;
+        }
+        .btn-edit:hover { background: var(--accent-hover); color: white; transform: translateY(-1px); }
+        .btn-delete {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: #e53e3e;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover { background: #c53030; color: white; transform: translateY(-1px); }
+        .bible-meta {
+            font-size: 0.85rem;
+            font-style: italic;
+            color: #718096;
+            display: block;
+            margin-top: 0.5rem;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 0.3rem;
+        } </style>
 </head>
 
 <body>
@@ -321,11 +352,13 @@
 
             <div class="verse-block" id="1.1">
                 <span class="verse-ref">1:1</span>
-                <p class="verse-text">Texto bíblico de Amós 1:1...</p>
+                <p class="verse-text"><span class="original-text">1 דִּבְרֵ֣י עָמ֔וֹס אֲשֶׁר־הָיָ֥ה בַנֹּקְדִ֖ים מִתְּק֑וֹעַ אֲשֶׁר֩ חָזָ֨ה עַל־יִשְׂרָאֵ֜ל בִּימֵ֣י׀ עֻזִּיָּ֣ה מֶֽלֶךְ־יְהוּדָ֗ה וּבִימֵ֞י יָרָבְעָ֤ם בֶּן־יוֹאָשׁ֙ מֶ֣לֶךְ יִשְׂרָאֵ֔ל שְׁנָתַ֖יִם לִפְנֵ֥י הָרָֽעַשׁ׃</span><br /><span class="translation-text">Juicio contra las naciones vecinas 1 Palabras de Amós, que fue uno de los pastores de Tecoa, de lo que vio en visión acerca de Israel en días de Uzías, rey de Judá, y en días de Jeroboam, hijo de Joás, rey de Israel, dos años antes del terremoto.<span class="bible-meta">Cross references Amós 1:1 : Amós 7:14 Amós 1:1 : 2 Sam. 14:2; Jer. 6:1 Amós 1:1 : 2 Crón. 26:1-23; Isa. 1:1 Amós 1:1 : 2 Rey. 14:23-29; Os. 1:1; Amós 7:10, 11 Amós 1:1 : Zac. 14:5</span></span></p>
                 <div class="commentary">
                     <p>Espacio para comentarios del libro de Amós.</p>
                 </div>
-            </div>
+            
+                <a href="editor-web.html?book=amos&amp;chapter=1&amp;verse=1" class="btn-edit">✏️ Editar</a>
+                <a href="editor-web.html?action=delete&amp;book=amos&amp;chapter=1&amp;verse=1" class="btn-delete">🗑️ Borrar</a></div>
             
             <div class="return-top">
                 <a href="#top">↑ Volver Arriba</a>
@@ -337,6 +370,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
 
-</html>
+
+</body></html>
