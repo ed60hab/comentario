@@ -1341,10 +1341,26 @@
                     url = `https://wlc.consoft.site/${fileName}`;
                 }
 
-                // Usamos AllOrigins como proxy CORS
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                const response = await fetch(proxyUrl);
-                const result = await response.json();
+                // Función interna para realizar el fetch con reintentos
+                const fetchWithRetry = async (url, retries = 2) => {
+                    for (let i = 0; i <= retries; i++) {
+                        try {
+                            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&td=${Date.now()}`;
+                            const response = await fetch(proxyUrl);
+                            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                            return await response.json();
+                        } catch (err) {
+                            if (i === retries) throw err;
+                            console.log(`Reintentando fetch (${i + 1}/${retries})...`);
+                            await new Promise(r => setTimeout(r, 1000));
+                        }
+                    }
+                };
+
+                originalField.innerHTML = "⏳ Conectando con la fuente...";
+                translationField.innerHTML = "⏳ Esto puede tardar 2-3 segundos...";
+
+                const result = await fetchWithRetry(url);
                 const data = result.contents;
 
                 if (isNT) {
