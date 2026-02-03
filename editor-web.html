@@ -1270,23 +1270,44 @@
             originalField.innerHTML = "Cargando...";
             translationField.innerHTML = "Cargando...";
 
-            // Si estamos en local (localhost/127.0.0.1/192.168...), podemos intentar usar el proxy del servidor
-            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+            // Intentar conectar con el servidor local (aunque estemos en GitHub Pages)
+            // Probamos localhost:3000 que es el puerto por defecto
+            const localServerUrls = [
+                `/fetch-bible`, // Relativo si estamos en Local
+                `http://localhost:3000/fetch-bible`,
+                `http://127.0.0.1:3000/fetch-bible`
+            ];
 
-            if (isLocal) {
+            for (const baseUrl of localServerUrls) {
                 try {
-                    const url = `/fetch-bible?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
-                    const resp = await fetch(url);
-                    const data = await resp.json();
-                    if (data.text || data.lbla || data.wlc) {
-                        originalField.innerHTML = data.wlc || '';
-                        translationField.innerHTML = data.lbla || data.text || '';
-                        return;
+                    const url = `${baseUrl}?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
+                    const resp = await fetch(url, { mode: 'cors' });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        if (data.text || data.lbla || data.wlc) {
+                            originalField.innerHTML = data.wlc || '';
+                            translationField.innerHTML = data.lbla || data.text || '';
+                            return;
+                        }
                     }
-                } catch (e) { console.warn("Fallo fetch local en editor-web", e); }
+                } catch (e) {
+                    console.warn(`No se pudo conectar a ${baseUrl}:`, e.message);
+                }
             }
 
-            translationField.innerHTML = "⚠️ En modo Web puro (GitHub Pages), la carga automática está limitada por seguridad (CORS).<br><br>Si tienes el servidor de Node corriendo localmente, intenta usar el <b>Editor Local</b> o configura el acceso CORS en el servidor.";
+            // Si llegamos aquí, no se pudo cargar automáticamente
+            translationField.innerHTML = `
+                <div style="color: #c53030; background: #fff5f5; padding: 1rem; border-radius: 8px; border: 1px solid #feb2b2;">
+                    <p><strong>⚠️ Carga automática limitada (CORS)</strong></p>
+                    <p>En el Editor Nube (GitHub Pages), el navegador bloquea la descarga directa de otros sitios por seguridad.</p>
+                    <hr>
+                    <p><strong>Soluciones:</strong></p>
+                    <ul style="text-align: left; font-size: 0.9rem;">
+                        <li>Usa el <strong><a href="editor.html?book=${selectionState.book.filename.replace('.html', '')}&chapter=${chapter}&verse=${verse}" style="color: #3182ce; font-weight: bold;">Editor Local</a></strong> si tienes el servidor encendido.</li>
+                        <li>Copia y pega el texto manualmente aquí.</li>
+                        <li>Si el servidor está en otra IP, ábrela directamente.</li>
+                    </ul>
+                </div>`;
             originalField.innerHTML = "";
         }
 
