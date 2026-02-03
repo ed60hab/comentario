@@ -1163,11 +1163,15 @@ ${verseLink}
             const originalField = document.getElementById('originalText');
             const translationField = document.getElementById('translationText');
 
-            const book = selectionState.book ? selectionState.book.title : null;
-            const chapter = selectionState.chapter;
-            const verse = selectionState.verse;
+            // Priorizar variables de editMode si estamos editando
+            const book = editMode.isEditing ? editMode.bookName : (selectionState.book ? (selectionState.book.title || selectionState.book.filename.replace('.html', '')) : null);
+            const chapter = editMode.isEditing ? editMode.chapter : selectionState.chapter;
+            const verse = editMode.isEditing ? editMode.verse : selectionState.verse;
 
-            if (!book || !chapter || !verse) return;
+            if (!book || !chapter || !verse) {
+                console.warn('Faltan parámetros para cargar Biblia:', { book, chapter, verse });
+                return;
+            }
 
             originalField.innerHTML = "⏳ Conectando con la fuente...";
             translationField.innerHTML = "⏳ Esto puede tardar unos segundos...";

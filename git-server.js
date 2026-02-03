@@ -238,7 +238,7 @@ app.get('/fetch-bible', (req, res) => {
             response.on('data', (chunk) => { data += chunk; });
             response.on('end', () => {
                 // 1. Isolar el capítulo
-                const chapterRegex = new RegExp(`<div id=["']${chapter}["'] class=["']chapter["']>([\\s\\S]*?)<div class=["']navigation["']>`, 'i');
+                const chapterRegex = new RegExp(`<div id=["']${chapter}["'] class=["']chapter[^"']*["']>([\\s\\S]*?)<div class=["']navigation[^"']*["']>`, 'i');
                 const chapterMatch = data.match(chapterRegex);
                 if (!chapterMatch) {
                     return res.json({ text: `(Capítulo ${chapter} no encontrado en ${book})` });
@@ -247,11 +247,12 @@ app.get('/fetch-bible', (req, res) => {
 
                 // Helper para extraer versículo de una columna
                 const getVerseFromColumn = (html, columnClass, vNum) => {
-                    const colRegex = new RegExp(`<div class=["']column ${columnClass}["']>([\\s\\S]*?)</div>\\s*<div class=["']column`, 'i');
-                    const colMatch = html.match(colRegex) || html.match(new RegExp(`<div class=["']column ${columnClass}["']>([\\s\\S]*?)</div>\\s*</div>`, 'i'));
+                    // El regex para columnas debe ser flexible con clases adicionales como p-3, etc.
+                    const colRegex = new RegExp(`<div class=["']column ${columnClass}[^"']*["']>([\\s\\S]*?)</div>\\s*(<div class=["']column|<div class=["']navigation[^"']*["']|</div>\\s*</div>)`, 'i');
+                    const colMatch = html.match(colRegex);
                     if (!colMatch) return null;
 
-                    const verseRegex = new RegExp(`<div class=["']verse["']>\\s*<span class=["']verse-number["']>${vNum}</span>\\s*<span class=["']verse-text[^"']*["']>([\\s\\S]*?)</span>\\s*</div>`, 'i');
+                    const verseRegex = new RegExp(`<div class=["']verse[^"']*["']>\\s*<span class=["']verse-number["']>${vNum}</span>\\s*<span class=["']verse-text[^"']*["']>([\\s\\S]*?)</span>\\s*</div>`, 'i');
                     const match = colMatch[1].match(verseRegex);
                     if (!match) return null;
 
