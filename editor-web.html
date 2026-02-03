@@ -453,6 +453,7 @@
             border-top: 1px dashed #e2e8f0;
             padding-top: 0.3rem;
         }
+
         .bible-meta {
             font-size: 0.85rem;
             font-style: italic;
@@ -461,7 +462,8 @@
             margin-top: 0.5rem;
             border-top: 1px dashed #e2e8f0;
             padding-top: 0.3rem;
-        }    </style>
+        }
+    </style>
 </head>
 
 <body>
@@ -1376,7 +1378,7 @@
                 };
 
                 originalField.innerHTML = "⏳ Conectando con la fuente...";
-                translationField.innerHTML = "⏳ Esto puede tardar 2-3 segundos...";
+                translationField.innerHTML = "⏳ Esto puede tardar unos segundos...";
 
                 const result = await fetchWithRetry(url);
                 const data = result.contents;
