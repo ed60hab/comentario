@@ -1270,45 +1270,138 @@
             originalField.innerHTML = "Cargando...";
             translationField.innerHTML = "Cargando...";
 
-            // Intentar conectar con el servidor local (aunque estemos en GitHub Pages)
-            // Probamos localhost:3000 que es el puerto por defecto
-            const localServerUrls = [
-                `/fetch-bible`, // Relativo si estamos en Local
-                `http://localhost:3000/fetch-bible`,
-                `http://127.0.0.1:3000/fetch-bible`
-            ];
+            const bookMapping = {
+                'génesis': 'genesis.html', 'genesis': 'genesis.html',
+                'éxodo': 'exodo.html', 'exodo': 'exodo.html',
+                'levítico': 'levitico.html', 'levitico': 'levitico.html',
+                'números': 'numeros.html', 'numeros': 'numeros.html',
+                'deuteronomio': 'deuteronomio.html',
+                'josué': 'josue.html', 'josue': 'josue.html',
+                'jueces': 'jueces.html',
+                '1 samuel': '1samuel.html',
+                '2 samuel': '2samuel.html',
+                '1 reyes': '1reyes.html',
+                '2 reyes': '2reyes.html',
+                'isaías': 'isaias.html', 'isaias': 'isaias.html',
+                'jeremías': 'jeremias.html', 'jeremias': 'jeremias.html',
+                'ezequiel': 'ezequiel.html',
+                'oseas': 'oseas.html',
+                'joel': 'joel.html',
+                'amós': 'amos.html', 'amos': 'amos.html',
+                'abdías': 'abdias.html', 'abdias': 'abdias.html',
+                'jonás': 'jonas.html', 'jonas': 'jonas.html',
+                'miqueas': 'miqueas.html',
+                'nahúm': 'nahum.html', 'nahum': 'nahum.html',
+                'habacuc': 'habacuc.html',
+                'sofonías': 'sofonias.html', 'sofonias': 'sofonias.html',
+                'hageo': 'hageo.html',
+                'zacarías': 'zacarias.html', 'zacarias': 'zacarias.html',
+                'malaquías': 'malaquias.html', 'malaquias': 'malaquias.html',
+                'salmos': 'salmos.html',
+                'proverbios': 'proverbios.html',
+                'job': 'job.html',
+                'cantares': 'cantares.html',
+                'rut': 'rut.html',
+                'lamentaciones': 'lamentaciones.html',
+                'eclesiastés': 'eclesiastes.html', 'eclesiastes': 'eclesiastes.html',
+                'ester': 'ester.html',
+                'daniel': 'daniel.html',
+                'esdras': 'esdras.html',
+                'nehemías': 'nehemias.html', 'nehemias': 'nehemias.html',
+                '1 crónicas': '1cronicas.html', '1 cronicas': '1cronicas.html',
+                '2 crónicas': '2cronicas.html', '2 cronicas': '2cronicas.html',
+                'mateo': 'mateo.html', 'marcos': 'marcos.html', 'lucas': 'lucas.html', 'juan': 'juan.html',
+                'hechos': 'hechos.html', 'romanos': 'romanos.html', '1 corintios': '1corintios.html',
+                '2 corintios': '2corintios.html', 'gálatas': 'galatas.html', 'galatas': 'galatas.html',
+                'efesios': 'efesios.html', 'filipenses': 'filipenses.html', 'colosenses': 'colosenses.html',
+                '1 tesalonicenses': '1tesalonicenses.html', '2 tesalonicenses': '2tesalonicenses.html',
+                '1 timoteo': '1timoteo.html', '2 timoteo': '2timoteo.html', 'tito': 'tito.html',
+                'filemón': 'filemon.html', 'filemon': 'filemon.html', 'hebreos': 'hebreos.html',
+                'santiago': 'santiago.html', '1 pedro': '1pedro.html', '2 pedro': '2pedro.html',
+                '1 juan': '1juan.html', '2 juan': '2juan.html', '3 juan': '3juan.html',
+                'judas': 'judas.html', 'apocalipsis': 'apocalipsis.html'
+            };
 
-            for (const baseUrl of localServerUrls) {
-                try {
-                    const url = `${baseUrl}?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
-                    const resp = await fetch(url, { mode: 'cors' });
-                    if (resp.ok) {
-                        const data = await resp.json();
-                        if (data.text || data.lbla || data.wlc) {
-                            originalField.innerHTML = data.wlc || '';
-                            translationField.innerHTML = data.lbla || data.text || '';
-                            return;
-                        }
-                    }
-                } catch (e) {
-                    console.warn(`No se pudo conectar a ${baseUrl}:`, e.message);
-                }
+            const fileName = bookMapping[book.toLowerCase()];
+            if (!fileName) {
+                translationField.innerHTML = `(Libro ${book} no soportado todavía)`;
+                originalField.innerHTML = "";
+                return;
             }
 
-            // Si llegamos aquí, no se pudo cargar automáticamente
-            translationField.innerHTML = `
-                <div style="color: #c53030; background: #fff5f5; padding: 1rem; border-radius: 8px; border: 1px solid #feb2b2;">
-                    <p><strong>⚠️ Carga automática limitada (CORS)</strong></p>
-                    <p>En el Editor Nube (GitHub Pages), el navegador bloquea la descarga directa de otros sitios por seguridad.</p>
-                    <hr>
-                    <p><strong>Soluciones:</strong></p>
-                    <ul style="text-align: left; font-size: 0.9rem;">
-                        <li>Usa el <strong><a href="editor.html?book=${selectionState.book.filename.replace('.html', '')}&chapter=${chapter}&verse=${verse}" style="color: #3182ce; font-weight: bold;">Editor Local</a></strong> si tienes el servidor encendido.</li>
-                        <li>Copia y pega el texto manualmente aquí.</li>
-                        <li>Si el servidor está en otra IP, ábrela directamente.</li>
-                    </ul>
-                </div>`;
-            originalField.innerHTML = "";
+            const ntBooks = ['mateo', 'marcos', 'lucas', 'juan', 'hechos', 'romanos', '1corintios', '2corintios', 'galatas', 'efesios', 'filipenses', 'colosenses', '1tesalonicenses', '2tesalonicenses', '1timoteo', '2timoteo', 'tito', 'filemon', 'hebreos', 'santiago', '1pedro', '2pedro', '1juan', '2juan', '3juan', 'judas', 'apocalipsis'];
+            const isNT = ntBooks.includes(fileName.replace('.html', ''));
+
+            try {
+                let url;
+                if (isNT) {
+                    const bibleBook = book.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    url = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(bibleBook)}+${chapter}:${verse}&version=SBLGNT;LBLA`;
+                } else {
+                    url = `https://wlc.consoft.site/${fileName}`;
+                }
+
+                // Usamos AllOrigins como proxy CORS
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl);
+                const result = await response.json();
+                const data = result.contents;
+
+                if (isNT) {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data, 'text/html');
+                    const passages = doc.querySelectorAll('.passage-content');
+                    let versions = [];
+                    passages.forEach(p => {
+                        // Limpiar texto
+                        const sups = p.querySelectorAll('sup');
+                        sups.forEach(s => s.remove());
+                        let text = p.textContent.replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+                        if (text && !text.includes('Full chapter')) versions.push(text);
+                    });
+                    const gnt = versions[0] || "";
+                    const lbla = versions[1] || "";
+                    originalField.innerHTML = gnt;
+                    translationField.innerHTML = lbla;
+                } else {
+                    // Lógica OT (wlc.consoft.site)
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data, 'text/html');
+                    const chapterDiv = doc.getElementById(chapter.toString());
+                    if (!chapterDiv) throw new Error(`Capítulo ${chapter} no encontrado`);
+
+                    const getVerseText = (columnClass) => {
+                        const col = chapterDiv.querySelector(`.column.${columnClass}`);
+                        if (!col) return null;
+                        const verseDiv = Array.from(col.querySelectorAll('.verse')).find(v => {
+                            const vNum = v.querySelector('.verse-number');
+                            return vNum && vNum.textContent.trim() === verse.toString();
+                        });
+                        if (!verseDiv) return null;
+                        const textElem = verseDiv.querySelector('.verse-text');
+                        return textElem ? textElem.innerHTML
+                            .replace(/<link[^>]*>|<style[^>]*>|<script[^>]*>|<!--[\s\S]*?-->/gi, '')
+                            .replace(/<\/?[a-z][^>]*>/gi, ' ')
+                            .replace(/\s+/g, ' ')
+                            .trim() : null;
+                    };
+
+                    const lblaText = getVerseText('lbla');
+                    const wlcText = getVerseText('wlc');
+
+                    originalField.innerHTML = wlcText || "";
+                    translationField.innerHTML = lblaText || "(Texto no encontrado)";
+                }
+            } catch (e) {
+                console.error('Error fetching Bible in Cloud Mode:', e);
+                translationField.innerHTML = `
+                    <div style="color: #c53030; background: #fff5f5; padding: 1rem; border-radius: 8px; border: 1px solid #feb2b2;">
+                        <p><strong>❌ Error al cargar texto bíblico</strong></p>
+                        <p>${e.message}</p>
+                        <p>Intenta copiar y pegar el texto manualmente.</p>
+                    </div>`;
+                originalField.innerHTML = "";
+            }
         }
 
         async function verifyVerse() {
