@@ -1466,8 +1466,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data, 'text/html');
                 const passages = doc.querySelectorAll('.passage-content');
-                let versions = [];
-
+                let compiledVersions = [];
                 passages.forEach(p => {
                     let rawHtml = p.innerHTML;
                     rawHtml = rawHtml.replace(/<!--[\s\S]*?-->/g, '').replace(/Read full chapter/gi, '');
@@ -1492,12 +1491,13 @@
                         return isMeta ? `<span class="bible-meta">${text}</span>` : text;
                     };
 
-                    versions.push(cleanInBrowser(bodyHtml));
-                    if (metaHtml) versions.push(cleanInBrowser(metaHtml, true));
+                    let versionHtml = cleanInBrowser(bodyHtml);
+                    if (metaHtml) versionHtml += cleanInBrowser(metaHtml, true);
+                    compiledVersions.push(versionHtml);
                 });
 
-                originalField.innerHTML = versions[0] || "(Texto original no encontrado)";
-                translationField.innerHTML = versions[1] || "(Traducción no encontrada)";
+                originalField.innerHTML = compiledVersions[0] || "(Texto original no encontrado)";
+                translationField.innerHTML = compiledVersions[1] || "(Traducción no encontrada)";
 
             } catch (e) {
                 console.error('Fetch Error:', e);
