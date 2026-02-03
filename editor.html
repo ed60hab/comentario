@@ -428,6 +428,7 @@
             border-top: 1px dashed #e2e8f0;
             padding-top: 0.3rem;
         }
+
         .bible-meta {
             font-size: 0.85rem;
             font-style: italic;
@@ -436,7 +437,8 @@
             margin-top: 0.5rem;
             border-top: 1px dashed #e2e8f0;
             padding-top: 0.3rem;
-        }    </style>
+        }
+    </style>
 </head>
 
 <body>
@@ -1167,24 +1169,36 @@ ${verseLink}
 
             if (!book || !chapter || !verse) return;
 
-            originalField.innerHTML = "Cargando...";
-            translationField.innerHTML = "Cargando...";
+            originalField.innerHTML = "⏳ Conectando con la fuente...";
+            translationField.innerHTML = "⏳ Esto puede tardar unos segundos...";
 
             try {
                 const url = `/fetch-bible?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
                 const resp = await fetch(url);
+
+                if (!resp.ok) {
+                    const errorText = await resp.text();
+                    console.error('Error del servidor:', errorText);
+                    throw new Error(`Error de red: ${resp.status}`);
+                }
+
                 const data = await resp.json();
 
                 if (data.text || data.lbla || data.wlc) {
                     originalField.innerHTML = data.wlc || '';
-                    translationField.innerHTML = data.lbla || data.text || ''; // Fallback a text si lbla falta
+                    translationField.innerHTML = data.lbla || data.text || '';
                 } else {
-                    translationField.innerHTML = `(No se pudo cargar el texto automáticamente para ${book} ${chapter}:${verse})`;
+                    translationField.innerHTML = `⚠️ No se encontró el texto para ${book} ${chapter}:${verse}`;
                     originalField.innerHTML = '';
                 }
             } catch (e) {
                 console.error('Error fetching Bible:', e);
-                translationField.innerHTML = `(Error de conexión al cargar ${book} ${chapter}:${verse})`;
+                translationField.innerHTML = `
+                    <div style="color: #c53030; background: #fff5f5; padding: 1rem; border-radius: 8px; border: 1px solid #feb2b2; font-size: 0.9rem;">
+                        <p><strong>❌ Error al cargar texto bíblico</strong></p>
+                        <p>${e.message.includes('Unexpected token') ? 'El servidor devolvió un error (HTML) en lugar de datos.' : e.message}</p>
+                        <p>Asegúrate de que el servidor de Node esté corriendo correctamente.</p>
+                    </div>`;
                 originalField.innerHTML = '';
             }
         }
@@ -1423,6 +1437,12 @@ ${verseLink}
                             commitMessage: `Actualizado ${editMode.bookName} ${editMode.chapter}:${editMode.verse}`
                         })
                     });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Error del servidor:', errorText);
+                        throw new Error(`Error del servidor (${response.status})`);
+                    }
 
                     const result = await response.json();
                     if (result.success) {
