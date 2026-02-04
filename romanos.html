@@ -226,7 +226,43 @@
             margin-top: 0.5rem;
             border-top: 1px dashed #e2e8f0;
             padding-top: 0.3rem;
-        }    </style>
+        }    
+        .btn-edit {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-right: 0.5rem;
+        }
+        .btn-edit:hover { background: var(--accent-hover); color: white; transform: translateY(-1px); }
+        .btn-delete {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: #e53e3e;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover { background: #c53030; color: white; transform: translateY(-1px); }
+        .bible-meta {
+            font-size: 0.85rem;
+            font-style: italic;
+            color: #718096;
+            display: block;
+            margin-top: 0.5rem;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 0.3rem;
+        } </style>
 </head>
 
 <body>
@@ -323,11 +359,13 @@
 
             <div class="verse-block" id="1.1">
                 <span class="verse-ref">1:1</span>
-                <p class="verse-text">Texto bíblico de Romanos 1:1...</p>
+                <p class="verse-text"><span class="original-text">1 Παῦλος δοῦλος Χριστοῦ Ἰησοῦ, κλητὸς ἀπόστολος, ἀφωρισμένος εἰς εὐαγγέλιον θεοῦ<span class="bible-meta">Footnotes: Debo ΡΩΜΑΙΟΥΣ 1:1 Χριστοῦ Ἰησοῦ Treg NIV ] Ἰησοῦ Χριστοῦ WH RP</span></span><br /><span class="translation-text">Saludo 1 Pablo, siervo de Cristo Jesús, llamado a ser apóstol, apartado para el evangelio de Dios,<span class="bible-meta">Footnotes: Romanos 1:1 Lit., un apóstol llamado Cross references Romanos 1:1 : 1 Cor. 1:1; 9:1; 2 Cor. 1:1 Romanos 1:1 : Hech. 9:15; 13:2; Gál. 1:15 Romanos 1:1 : Mar. 1:14; Rom. 15:16; 2 Cor. 2:12; 11:7; 1 Tes. 2:2, 8, 9; 1 Ped. 4:17</span></span></p>
                 <div class="commentary">
                     <p>Espacio para comentarios del libro de Romanos.</p>
                 </div>
-            </div>
+            
+                <a href="editor-web.html?book=romanos&amp;chapter=1&amp;verse=1" class="btn-edit">✏️ Editar</a>
+                <a href="editor-web.html?action=delete&amp;book=romanos&amp;chapter=1&amp;verse=1" class="btn-delete">🗑️ Borrar</a></div>
             
             <div class="return-top">
                 <a href="#top">↑ Volver Arriba</a>
